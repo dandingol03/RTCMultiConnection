@@ -327,12 +327,19 @@ expressRoute.get('/*', function (request, response) {
 
 
 //todo:发送文件消息的业务逻辑,由吴清忠完成
-var sendFileMessage = function (file,sender, receiver, type, chatType) {
+var sendFileMessage = function (file, sender, receiver, Type,chatType) {
     // console.log(Memory.listOfUsers)
     // var socket=Memory.listOfUsers.danding.socket
     // socket.emit('receive-test','hello ')
+    var data;
+    data = {
+        content: message,
+        sender_id: sender,
+        type: Type,
+        send_date: Api.getTaskTime(new Date().toString())
+    }
     var message = file
-    console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + type + "+++" + chatType)
+    console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + Type)
     if (chatType == 1) {
         //messageType为1时，为单人聊天
         console.log("单人++++++++++" + chatType + "+++");
@@ -341,10 +348,11 @@ var sendFileMessage = function (file,sender, receiver, type, chatType) {
         userIds.push(receiver);
         Api.createRoomWithoutName(userIds).then((roomId) => {
             if (Memory.listOfUsers[reiceiver] != null) {
-                Memory.listOfUsers[reiceiver].socket.emit('receive-message', message, receiver);
-                console.log("单人11111111111++++++++++" + chatType + "+++");
+
+                Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
+                // console.log("单人11111111111++++++++++" + chatType + "+++");
             } else {
-                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver], type);
+                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver]);
                 console.log("单人111111++++++++++" + chatType + "+++");
             }
         });
@@ -376,14 +384,14 @@ var sendFileMessage = function (file,sender, receiver, type, chatType) {
                 console.log(roomId.id);
                 if (leaveUsers != null) {
                     console.log("单人22222++++++++++=====" + chatType + "+++");
-                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, type).then(() => {
-                        console.log("roomId.id======" + roomId.id + "++++leaveUsers====" + leaveUsers);
-                        Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', message, receiver, sender);
-                        console.log('message' + message);
-                        console.log(socket.rooms);
+                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type).then(() => {
+                        // console.log("roomId.id======" + roomId.id + "++++leaveUsers====" + leaveUsers);
+                        Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
+                        // console.log('message' + message);
+
                     })
                 } else {
-                    Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', message, receiver, sender);
+                    Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
                 }
 
             })
