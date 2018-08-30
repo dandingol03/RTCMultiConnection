@@ -5,13 +5,14 @@ function IndexDB() {
     return {
          instance :{
             myDB:{
-                name:'sdrpoms',
+                name:'sdrpoms7',
                 version:1,
                 db:null,
                 ojstore:{
                     name:'content',//存储空间表的名字
                     keypath:'id'//主键
-                }
+                },
+                id:1
             },
             indexedDB:window.indexedDB||window.webkitindexedDB,
             IDBKeyRange:window.IDBKeyRange || window.webkitIDBKeyRange,//键范围
@@ -29,10 +30,16 @@ function IndexDB() {
                 };
                 request.onupgradeneeded=function(e){
                     var db=e.target.result,transaction= e.target.transaction,store;
+                    //没有该对象空间时创建该对象空间
                     if(!db.objectStoreNames.contains(self.myDB.ojstore.name)){
-                        //没有该对象空间时创建该对象空间
-                        store = db.createObjectStore(self.myDB.ojstore.name,{keyPath:self.myDB.ojstore.keypath});
+                        store = db.createObjectStore(self.myDB.ojstore.name,
+                            {
+                                keyPath:self.myDB.ojstore.keypath,
+                                autoIncrement: true
+                            });
                         console.log('成功建立对象存储空间：'+self.myDB.ojstore.name);
+                    }else{
+                        
                     }
                 }
     

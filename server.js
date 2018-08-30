@@ -54,7 +54,7 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     console.log()
     // })
 
-    Api.getRoomMember('test8-2910').then((res)=>{
+    Api.getGroupChatRooms('user_150259').then((res)=>{
         console.log()
     })
 

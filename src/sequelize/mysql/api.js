@@ -295,7 +295,7 @@ var Api = {
                         for(var k=0;k<rooms.length;k++)
                         {
                             if(rooms[k]!=null)
-                                matchedRooms.push(rooms[k].name)
+                                matchedRooms.push(rooms[k].get({plain:true}))
                         }
                         deferred.resolve({re:1,data:matchedRooms})
                     }).catch((e)=>{
