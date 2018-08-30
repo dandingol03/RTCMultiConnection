@@ -3,7 +3,6 @@
 
 function myTool() {
     return {
-        videosContainer:null,
         connection: null,
         localUserid: null,
         video: null,
@@ -12,24 +11,31 @@ function myTool() {
         rec: null,
         // streams:[],
         toolInit: function () {
-
-            var instance=this
             this.connection = new RTCMultiConnection();
+            this.tmp = document.getElementById('videos-container');
+            this.connection.videosContainer = document.getElementById('videos-container');
             this.connection.socketURL = '/';
-            this.connection.socketMessageEvent = 'video-conference';
-            
+            // this.connection.socketURL = 'https://58.56.100.10:9001/';
+            // this.connection.attachStreams = {};
+
+            // comment-out below line if you do not have your  own socket.io server
+            // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+            this.connection.socketMessageEvent = 'audio-video-file-chat-demo';
+
+            this.connection.enableFileSharing = true; // by default, it is "false".
+
             this.connection.session = {
                 audio: true,
                 video: true,
+                data: true
             };
+
 
             this.connection.sdpConstraints.mandatory = {
                 OfferToReceiveAudio: true,
                 OfferToReceiveVideo: true
             };
-
-            this.tmp = document.getElementById('videos-container');
-            this.connection.videosContainer = document.getElementById('videos-container');
 
 
 
@@ -39,7 +45,7 @@ function myTool() {
                 // streams.push(event.stream)
 
 
-                //地图上会有默认的视频元素
+                //地图上会有默认的视频元
                 var video = document.createElement('video');
                 video.controls = true;
                 console.log(event.type);
@@ -67,7 +73,7 @@ function myTool() {
 
                 setTimeout(function () {
                     mediaElement.media.play();
-                }, 2000);
+                }, 5000);
 
                 mediaElement.id = event.streamid;
             };
@@ -139,12 +145,6 @@ function myTool() {
             var instance = this;
             //注册
             this.connection.login(localUserId, isTeamMember, function () {
-
-                //获取用户信息
-                setTimeout(function () {
-                    connection.socket.emit('get-userlist', connection.userid);
-                }, 400)
-
                 //接收录音信息
                 instance.connection.socket.on('receive-audio', function (message, userid) {
                     var obj_url = window.URL.createVideoUrl(new Blob([message], { type: "audio/mp3" }))
@@ -153,15 +153,16 @@ function myTool() {
 
                 });
                 //接收聊天消息
-                instance.connection.socket.on('receive-message', function (message, userid) {
-                    console.log("======接收到的聊天信息=====", message);
+                instance.connection.socket.on('receive-message', function (message) {
+                    console.log("======接收到的聊天信息=====");
+                    console.log(message);
 
                 });
                 //接收未读聊天消息 
-                instance.connection.socket.on('receive-unread-message', function (message, userid) {
-                    console.log("======接收到的聊天信息=====", message);
+                // instance.connection.socket.on('receive-unread-message', function (message, userid) {
+                //     console.log("======接收到的聊天信息=====", message);
 
-                });
+                // });
 
                 //接收录音信息
                 instance.connection.socket.on('receive-img', function (data) {
@@ -177,8 +178,9 @@ function myTool() {
 
                 });
                 //接收群消息 
-                instance.connection.socket.on('receive-message-group', function (groupId, message) {
-                    console.log("=========接收到群消息========" + groupId + "+++++++++++" + message)
+                instance.connection.socket.on('receive-message-group', function ( message) {
+                    console.log("=========接收到群消息========");
+                    console.log(message);
                 });
                 //接收用户所在的所有群的名字
                 instance.connection.socket.on('receive-group-list', function (groupId, message) {
@@ -199,25 +201,6 @@ function myTool() {
                     console.log("=========接收到群列表========");
                     console.log(groupId);
                 });
-                //返回用户列表
-                instance.connection.socket.on('return-userlist', function (responseCode, data) {
-                    var userlist = new Array();
-                    var peoplist = document.getElementById('makePeopList')
-                    console.log(data);
-                    
-                    while (peoplist.hasChildNodes()) {
-                        peoplist.removeChild(peoplist.firstChild);
-                    }
-                    for (var i = 0; i < data.length; i++) {
-                        userlist.push(data[i]);
-                        var newItem = document.createElement("LI")
-                        var textnode = document.createTextNode(data[i].userId)
-                        newItem.appendChild(textnode)
-                        peoplist.insertBefore(newItem, peoplist.childNodes[0]);
-                    }
-        
-                });
-            
 
                 // instance.connection.socket.on('join-our-group', function (groupName) {
                 //     console.log("=========接收到群列表========"+groupName+"========"+userId);
@@ -285,9 +268,9 @@ function myTool() {
         },
         /********************************************************* */
         //单人发送文本消息
-        sendMessage: function (message, remoteUser, callback) {
+        sendMessage: function (message, remoteUser, a,b,c,d) {
             var instance = this;
-            instance.connection.socket.emit('send-message-person', message, remoteUser, instance.connection.userid);
+            instance.connection.socket.emit('send-message-person', message, remoteUser,a,b);
         },
         //用户加入群
         joinGroup: function (groupId) {
@@ -295,7 +278,7 @@ function myTool() {
             instance.connection.socket.emit('join-group', groupId, instance.localUserid)
         },
         //在群里发送文本消息
-        sendMessageGroup: function (groupId, message, sender, type) {
+        sendMessageGroup: function (message, groupId, sender, type) {
             var instance = this;
             instance.connection.socket.emit('send-message-group', groupId, message, sender, type);
         },
@@ -315,21 +298,15 @@ function myTool() {
             instance.connection.socket.emit('get-userRoom', userid);
         },
         //邀请用户加入群聊
-        inviteUserJoinGroup: function (userIds) {
+        inviteUserJoinGroup: function (groupName,userIds) {
             var instance = this;
-            instance.connection.socket.emit('invite-user-join-group', userIds);
+            instance.connection.socket.emit('invite-user-join-group',groupName, userIds);
         },
         //获取群中人员的列表
         getGroupUsers: function (groupName) {
             var instance = this;
             instance.connection.socket.emit('get-group-users', groupName);
         },
-        //获取中介人
-        getPublicModerators:function(){
-            this.connection.getPublicModerators(function(moderators){
-                return moderators
-            })
-        }
     }
 
 }
