@@ -334,7 +334,7 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
 
     var message = file
     console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + Type)
-    if (chatType == 1) {
+    if (mchatType == 1) {
         var data;
         data = {
             content: file,

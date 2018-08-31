@@ -44,7 +44,7 @@ module.exports = exports = function (app, socketCallback) {
                 tempuserlist.push(temp);
             }
             io.emit('return-userlist', 1, tempuserlist);
-            console.log(listOfUsers);
+            
         }
 
 
