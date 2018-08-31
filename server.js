@@ -334,7 +334,7 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
 
     var message = file
     console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + Type)
-    if (mchatType == 1) {
+    if (mChatType == 1) {
         var data;
         data = {
             content: file,
@@ -353,13 +353,11 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
             } else {
-                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver]);
-                console.log("单人111111++++++++++" + chatType + "+++");
+                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver],Type,mChatType);
             }
         });
     } else {
         //多人聊天
-        console.log("单人22222++++++++++" + chatType + "+++");
         //messageType为2时，为群聊
         Api.getRoomMember(receiver).then((userIds) => {
             console.log(userIds);
@@ -392,7 +390,7 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
                 }
                 console.log(roomId.id);
                 if (leaveUsers != null) {
-                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type).then(() => {
+                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type,mChatType).then(() => {
                         Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
                     })
                 } else {
@@ -424,8 +422,8 @@ expressRoute.post('/file-upload', function (request, response) {
         var sender = request.body.sender;
         var receiver = request.body.receiver;
         var type = request.body.type;
-        var chatType = '2';
-        sendFileMessage(file.filename, sender, receiver, type, chatType);
+        var mChatType = request.body.chatType;
+        sendFileMessage(file.filename, sender, receiver, type,mChatType);
     })
 
 })
