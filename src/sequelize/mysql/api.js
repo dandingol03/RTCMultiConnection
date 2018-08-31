@@ -10,17 +10,17 @@ var Api = {
         return mysql.RoomInfo.create({ name: roomName, create_date: new Date().toString() }, { transaction: t })
     },
     //插入关系记录
-    insertRelation: (room_id, userIds, t) => {
+    insertRelation: (room_id, userIds, Type, t) => {
         var creates = []
         for (var i = 0; i < userIds.length; i++)
-            creates.push({ room_id: room_id, user_id: userIds[i], user_join_date: new Date().toString() })
+            creates.push({ room_id: room_id, user_id: userIds[i], user_join_date: Api.getTaskTime(new Date().toString()), type: Type })
         return mysql.RelationShip.bulkCreate(creates, { transaction: t })
     },
     //插入单聊关系记录
-    insertSingleRelation:(room_id,userIds,t)=>{
-        var creates=[]
-        for(var i=0;i<userIds.length;i++)
-            creates.push({room_id,user_id:userIds[i],user_join_date:new Date().toString(),type:1})    
+    insertSingleRelation: (room_id, userIds, t) => {
+        var creates = []
+        for (var i = 0; i < userIds.length; i++)
+            creates.push({ room_id, user_id: userIds[i], user_join_date: Api.getTaskTime(new Date().toString()), type: "1" })
         return mysql.RelationShip.bulkCreate(creates, { transaction: t })
     },
     //插入消息记录
@@ -176,9 +176,10 @@ var Api = {
                 //开启事务
                 mysql.sequelize.transaction().then((t) => {
 
-                    mysql.RoomInfo.create({ name: name, create_date: new Date().toString() }, { transaction: t })
+                    mysql.RoomInfo.create({ name: name, create_date: Api.getTaskTime(new Date().toString()), remark: "2" }, { transaction: t })
                         .then((room) => {
-                            return Api.insertRelation(room.id, userIds, t)
+                            //加入关系时  关系表中群聊type=2
+                            return Api.insertRelation(room.id, userIds, "2", t)
                         }).then(() => {
                             t.commit()
                             deferred.resolve({ re: 1 })
@@ -361,8 +362,9 @@ var Api = {
     },
     joinGroup:(room_id, user_id)=> {
         var deferred = Q.defer()
+        var type = 2;
         mysql.sequelize.transaction().then((t)=>{
-            Api.insertRelation(room_id,[user_id],t).then((res)=>{
+            Api.insertRelation(room_id, [user_id], type, t).then((res) => {
                 t.commit()
                 deferred.resolve({re:1})
             }).catch((e)=>{
