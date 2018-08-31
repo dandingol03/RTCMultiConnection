@@ -44,7 +44,7 @@ module.exports = exports = function (app, socketCallback) {
                 tempuserlist.push(temp);
             }
             io.emit('return-userlist', 1, tempuserlist);
-            console.log(tempuserlist);
+            console.log(listOfUsers);
         }
 
 
@@ -256,25 +256,25 @@ module.exports = exports = function (app, socketCallback) {
             userIds.push(remoteUserId);
             //创建1vs1的聊天室，返回房间id(若已经创建,返回房间名）
             var data = {};
-            var date = Api.getTaskTime(new Date().toString())
             data = {
                 content: message,
                 sender_id: userId,
                 type: mType,
-                send_date: date,
+                send_date: Api.getTaskTime(new Date().toString()),
                 chatType: mchatType
             }
             Api.createRoomWithoutName(userIds).then((roomId) => {
                 if (listOfUsers[remoteUserId] != null) {
                     listOfUsers[remoteUserId].socket.emit('receive-message', data)
                 } else {
-                    Api.sendGroupMessage(roomId.data.id, userId, message, [remoteUserId], type, mchatType);
+                    Api.sendGroupMessage(roomId.data.id, userId, message, [remoteUserId], mType, mchatType);
+                }
+
+                if (callback) {
+                    callback(true);
                 }
             })
 
-            if (callback) {
-                callback(true);
-            }
         })
 
         /*
@@ -293,6 +293,7 @@ module.exports = exports = function (app, socketCallback) {
                             for (var i = 0; i < userIds.length; i++) {
                                 listOfUsers[userIds[i]].socket.join(groupName);
                             };
+                            socket.emit('sys', groupName + "创建成功");
                             break;
                         }
                         case 2: {
@@ -310,21 +311,21 @@ module.exports = exports = function (app, socketCallback) {
             }
         })
 
-       //获取用户所在的所有群名
-       socket.on("get-userRoom", function (userId, callback) {
+        //获取用户所在的所有群名
+        socket.on("get-userRoom", function (userId, callback) {
 
-        Api.getGroupChatRooms(userId).then((roomIds) => {
-            if (roomIds && roomIds.data) {
-                socket.emit('receive-group-list', roomIds.data)
-            } else {
-                socket.emit('receive-group-list', [])
+            Api.getGroupChatRooms(userId).then((roomIds) => {
+                if (roomIds && roomIds.data) {
+                    socket.emit('receive-group-list', roomIds.data)
+                } else {
+                    socket.emit('receive-group-list', [])
+                }
+            })
+
+            if (callback) {
+                callback(true);
             }
         })
-
-        if (callback) {
-            callback(true);
-        }
-    })
 
 
         //获取群中所在的所有用户
@@ -389,69 +390,70 @@ module.exports = exports = function (app, socketCallback) {
                 socket.leave(room);
                 Api.getRoomMember(room).then((users) => {
                     if (users.data.length == 1) {
-
                         Api.dismissRoom(room);
                     }
                 })
+                if (callback) {
+                    callback(true);
+                }
             })
 
-            if (callback) {
-                callback(true);
-            }
 
         })
 
 
         //群聊消息 message文本消息，groupId群名，sender发送人，type消息类型
-        socket.on('send-message-group', function (message, groupId, sender, mType, callback) {
-            var room = groupId;
-            socket.to(room).emit('receive-message-group', data);
+        socket.on('send-message-group', function (newMessage, callback) {
+            var message = newMessage.message
+            var room = newMessage.groupName;
+            var roomId = newMessage.groupId;
+            var sender = newMessage.sender;
+            var mType = newMessage.type;
+            var mchatType = 2;  //群聊的chatType 为2
             var data;
             data = {
                 content: message,
                 sender_id: sender,
+                room_id: roomId,
                 chatType: mchatType,
                 type: mType,
                 send_date: Api.getTaskTime(new Date().toString())
             }
-            Api.getRoomMember(room).then((userIds) => {
-                console.log(userIds);
-                //获取当前群所有的成员
-                var users = [];
-                for (var i = 0; i < userIds.data.length; i++) {
-                    users.push(userIds.data[i].user_id);
+            if (message && room && roomId && sender && mType ) {
+                socket.to(room).emit('receive-message-group', data);
+                if (callback) {
+                    callback(true);
                 }
-                //筛选出当前不在线的群成员
-                var leaveUsers = [];
-                for (var i = 0; i < users.length; i++) {
-                    console.log(tempuserlist);
-                    try {
-                        if (listOfUsers[users[i]] == null) {
-                            leaveUsers.push(users[i]);
-                        }
-                    } catch (error) {
-                        console.log(error);
+                Api.getRoomMember(room).then((userIds) => {
+                    console.log(userIds);
+                    //获取当前群所有的成员
+                    var users = [];
+                    for (var i = 0; i < userIds.data.length; i++) {
+                        users.push(userIds.data[i].user_id);
                     }
-                }
-                Api.getRoomInfo(room).then((roomId) => {
-                    //将未读信息写进数据库
-                    var mchatType = 2; //群聊chatType为2
+                    //筛选出当前不在线的群成员
+                    var leaveUsers = [];
+                    for (var i = 0; i < users.length; i++) {
+                        // console.log(tempuserlist);
+                        try {
+                            if (listOfUsers[users[i]] == null) {
+                                leaveUsers.push(users[i]);
+                            } else {
+                                console.log(listOfUsers[users[i]].socket.rooms);
+                            }
+
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
                     console.log(roomId.id);
                     if (leaveUsers != null) {
-                        Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, mType, mchatType).then(() => {
-                            socket.to(room).emit('receive-message-group', data);
-                            console.log('message' + message);
-                            console.log(socket.rooms);
+                        Api.sendGroupMessage(roomId, sender, message, leaveUsers, mType, mchatType).then(() => {
                         })
-                    } else {
-                        socket.to(room).emit('receive-message-group', data);
                     }
-
                 })
-            })
-
-            if (callback) {
-                callback(true);
+            } else {
+                callback(false);
             }
         })
 
@@ -487,37 +489,37 @@ module.exports = exports = function (app, socketCallback) {
             callback = callback || function () { };
             //用户登录时初始化群聊分组信息  by wqz 
             Api.getGroupChatRooms(newUserId).then((roomIds) => {
-                console.log(roomIds);
+                console.log(listOfUsers[newUserId]);
                 for (var i = 0; i < roomIds.data.length; i++) {
-                    listOfUsers[newUserId].socket.join(roomIds.data[i]);
-                    socket.join(roomIds.data[i]);
+                    listOfUsers[newUserId].socket.join(roomIds.data[i].name);
+                    socket.join(roomIds.data[i].name);
                 }
                 console.log(listOfUsers[newUserId].socket.rooms);
             })
             //用户注册时获取所有的未读聊天信息
             Api.fetchMessegeUnread(newUserId).then((message) => {
                 console.log(message.data.room_id + "房间id" + message.data.content + "message.sender_id");
-                // console.log(message);
+                console.log(message);
                 for (var i = 0; i < message.data.length; i++) {
 
                     Api.deleteUnreadContent(message.data[i].id, newUserId);
-                    //当type为1时，为单人聊天
-
+                    //群聊  data中会有room_id
                     if (message.data[i].roomType == 2) {
                         var data;
                         data = {
                             content: message.data[i].content,
                             sender_id: message.data[i].sender_id,
+                            room_id: message.data[i].room_id,
                             type: message.data[i].type,
                             send_date: message.data[i].send_date
                         }
                         listOfUsers[newUserId].socket.emit("receive-message-group", data);
+                        //群聊  data中无room_id
                     } else if (message.data[i].roomType == 1) {
                         var data;
                         data = {
                             content: message.data[i].content,
                             sender_id: message.data[i].sender_id,
-                            room_id: message.data[i].room_id,
                             type: message.data[i].type,
                             send_date: message.data[i].send_date
                         }
@@ -903,12 +905,12 @@ function pushLogs() {
 
     try {
         logs = require(logsFile);
-    } catch (e) { }
+    } catch (e) {
 
+    }
     if (arguments[1] && arguments[1].stack) {
         arguments[1] = arguments[1].stack;
     }
-
     try {
         logs[utcDateString] = JSON.stringify(arguments, null, '\t');
         fs.writeFileSync(logsFile, JSON.stringify(logs, null, '\t'));
@@ -939,7 +941,6 @@ function searchCache(jsonFile, callback) {
             mod.children.forEach(function (child) {
                 run(child);
             });
-
             callback(mod);
         })(mod);
     }

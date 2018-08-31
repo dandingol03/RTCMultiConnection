@@ -54,7 +54,7 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     console.log()
     // })
 
-    // Api.getGroupChatRooms('user_150259').then((res)=>{
+
     //     console.log()
     // })
 
@@ -326,21 +326,23 @@ expressRoute.get('/*', function (request, response) {
 })
 
 
-//todo:发送文件消息的业务逻辑,由吴清忠完成
-var sendFileMessage = function (file, sender, receiver, Type,chatType) {
+//todo:发送文件消息的业务逻辑,由wqz完成 
+var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
     // console.log(Memory.listOfUsers)
     // var socket=Memory.listOfUsers.danding.socket
     // socket.emit('receive-test','hello ')
-    var data;
-    data = {
-        content: message,
-        sender_id: sender,
-        type: Type,
-        send_date: Api.getTaskTime(new Date().toString())
-    }
+
     var message = file
     console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + Type)
     if (chatType == 1) {
+        var data;
+        data = {
+            content: file,
+            sender_id: sender,
+            type: Type,
+            send_date: Api.getTaskTime(new Date().toString()),
+            chatType: mChatType
+        }
         //messageType为1时，为单人聊天
         console.log("单人++++++++++" + chatType + "+++");
         var userIds = [];
@@ -350,20 +352,19 @@ var sendFileMessage = function (file, sender, receiver, Type,chatType) {
             if (Memory.listOfUsers[reiceiver] != null) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
-                // console.log("单人11111111111++++++++++" + chatType + "+++");
             } else {
                 Api.sendGroupMessage(roomId.data.id, sender, message, [receiver]);
                 console.log("单人111111++++++++++" + chatType + "+++");
             }
         });
     } else {
+        //多人聊天
         console.log("单人22222++++++++++" + chatType + "+++");
         //messageType为2时，为群聊
         Api.getRoomMember(receiver).then((userIds) => {
             console.log(userIds);
             //获取当前群所有的成员
             var users = [];
-
             for (var i = 0; i < userIds.data.length; i++) {
                 users.push(userIds.data[i].user_id);
             }
@@ -381,14 +382,18 @@ var sendFileMessage = function (file, sender, receiver, Type,chatType) {
             }
             Api.getRoomInfo(receiver).then((roomId) => {
                 //将未读信息写进数据库
+                data = {
+                    content: file,
+                    sender_id: sender,
+                    type: Type,
+                    room_id: roomId.id,
+                    send_date: Api.getTaskTime(new Date().toString()),
+                    chatType: mChatType
+                }
                 console.log(roomId.id);
                 if (leaveUsers != null) {
-                    console.log("单人22222++++++++++=====" + chatType + "+++");
                     Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type).then(() => {
-                        // console.log("roomId.id======" + roomId.id + "++++leaveUsers====" + leaveUsers);
                         Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
-                        // console.log('message' + message);
-
                     })
                 } else {
                     Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
@@ -409,6 +414,7 @@ expressRoute.post('/file-upload', function (request, response) {
     console.log('...========.')
     var up = upload.single('file')
     console.log("request=========")
+    console.log(request.file);
     up(request, response, function (err) {
         var file = request.file
         console.log(file)
@@ -418,7 +424,7 @@ expressRoute.post('/file-upload', function (request, response) {
         var sender = request.body.sender;
         var receiver = request.body.receiver;
         var type = request.body.type;
-        var chatType = request.body.chatType;
+        var chatType = '2';
         sendFileMessage(file.filename, sender, receiver, type, chatType);
     })
 
