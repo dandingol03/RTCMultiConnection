@@ -206,9 +206,9 @@ function myTool() {
             this.connection.open(this.localUserid);
             this.connection.notify(remotename, this.localUserid);
         },
-        sendMessage: function (value) {
+        sendMessage: function (value,remoteUser,localUserid,type) {
             var instance = this;
-            instance.connection.socket.emit('send-message-person', message, remoteUser, instance.connection.userid);
+            instance.connection.socket.emit('send-message-person', value, remoteUser, localUserid,type);
         },
          //用户加入群
          joinGroup: function (groupId) {
@@ -216,9 +216,16 @@ function myTool() {
             instance.connection.socket.emit('join-group', groupId, instance.localUserid)
         },
         //在群里发送文本消息
-        sendMessageGroup: function (groupId, message, sender, type) {
+        sendMessageGroup: function (message, msender,roomId,mgroupName,mType) {
             var instance = this;
-            instance.connection.socket.emit('send-message-group', groupId, message, sender, type);
+            data = {
+                content: message,
+                sender: msender,
+                groupName: mgroupName,
+                room_id: roomId,
+                type: mType,
+            }
+            instance.connection.socket.emit('send-message-group',data);
         },
         //用户创建群
         createGroup: function (groupId, userIds) {

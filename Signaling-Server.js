@@ -44,7 +44,7 @@ module.exports = exports = function (app, socketCallback) {
                 tempuserlist.push(temp);
             }
             io.emit('return-userlist', 1, tempuserlist);
-            console.log(tempuserlist);
+            console.log(listOfUsers);
         }
 
 
@@ -391,11 +391,9 @@ module.exports = exports = function (app, socketCallback) {
                 socket.leave(room);
                 Api.getRoomMember(room).then((users) => {
                     if (users.data.length == 1) {
-
                         Api.dismissRoom(room);
                     }
                 })
-
                 if (callback) {
                     callback(true);
                 }
@@ -422,41 +420,42 @@ module.exports = exports = function (app, socketCallback) {
                 type: mType,
                 send_date: Api.getTaskTime(new Date().toString())
             }
-
-            socket.to(room).emit('receive-message-group', data);
-            if (callback) {
-                callback(true);
-            }
-            Api.getRoomMember(room).then((userIds) => {
-                console.log(userIds);
-                //获取当前群所有的成员
-                var users = [];
-                for (var i = 0; i < userIds.data.length; i++) {
-                    users.push(userIds.data[i].user_id);
+            if (message && room && roomId && sender && mType ) {
+                socket.to(room).emit('receive-message-group', data);
+                if (callback) {
+                    callback(true);
                 }
-                //筛选出当前不在线的群成员
-                var leaveUsers = [];
-                for (var i = 0; i < users.length; i++) {
-                    console.log(tempuserlist);
-                    try {
-                        if (listOfUsers[users[i]] == null) {
-                            leaveUsers.push(users[i]);
-                        } else {
-                            console.log(listOfUsers[users[i]].socket.rooms);
-                        }
-
-                    } catch (error) {
-                        console.log(error);
+                Api.getRoomMember(room).then((userIds) => {
+                    console.log(userIds);
+                    //获取当前群所有的成员
+                    var users = [];
+                    for (var i = 0; i < userIds.data.length; i++) {
+                        users.push(userIds.data[i].user_id);
                     }
-                }
-                console.log(roomId.id);
-                if (leaveUsers != null) {
-                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, mType, mchatType).then(() => {
-                      
-                    })
-                }
-                
-            })
+                    //筛选出当前不在线的群成员
+                    var leaveUsers = [];
+                    for (var i = 0; i < users.length; i++) {
+                        // console.log(tempuserlist);
+                        try {
+                            if (listOfUsers[users[i]] == null) {
+                                leaveUsers.push(users[i]);
+                            } else {
+                                console.log(listOfUsers[users[i]].socket.rooms);
+                            }
+
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
+                    console.log(roomId.id);
+                    if (leaveUsers != null) {
+                        Api.sendGroupMessage(roomId, sender, message, leaveUsers, mType, mchatType).then(() => {
+                        })
+                    }
+                })
+            } else {
+                callback(false);
+            }
         })
 
         //接受用户获取用户列表的消息，并发送用户信息 edit by wqz
@@ -491,7 +490,7 @@ module.exports = exports = function (app, socketCallback) {
             callback = callback || function () { };
             //用户登录时初始化群聊分组信息  by wqz 
             Api.getGroupChatRooms(newUserId).then((roomIds) => {
-                console.log(roomIds);
+                console.log(listOfUsers[newUserId]);
                 for (var i = 0; i < roomIds.data.length; i++) {
                     listOfUsers[newUserId].socket.join(roomIds.data[i].name);
                     socket.join(roomIds.data[i].name);
