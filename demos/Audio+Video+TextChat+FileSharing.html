@@ -11,8 +11,60 @@
             width: 100% !important
         }
     </style>
+    <script src="./js/jquery.min.js" />
+    <script type="text/javascript" src="js/recorder.js"> </script>
+    <script src="/dist/RTCMultiConnection.js"></script>
+    <script src="/dev/adapter.js"></script>
+    <script src="/dev/myTool-backup.js"></script>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- custom layout for HTML5 audio/video elements -->
+    <link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
+    <script src="/dev/getHTMLMediaElement.js"></script>
+
+    <script src="/dev/FileBufferReader.js"></script>
+
+
     <script>
-        window.createAudioUrl = window.URL.createObjectURL
+        $(document).ready(function () {
+
+            window.createAudioUrl = window.URL.createObjectURL
+
+            //1.
+            // window.addEventListener('message', function (event) {
+            //     console.log('got iframe message -> ' + event.data);
+            //     var message = event.data
+            //     if (message.action) {
+            //         switch (message.action) {
+            //             case 'ready':
+            //                 $('#child')[0].contentWindow.postMessage("user10_钉钉2",
+            //                     "https://192.168.0.101:9002/demos/Video-Conferencing.html")
+            //                 break;
+            //             case 'quit':
+            //                 $('#child').remove()
+            //                 break;
+            //         }
+            //     }
+
+            // }, false);
+            
+           
+
+            //2.
+            //添加父页面消息监听
+            window.addEventListener('message', function (event) {
+                console.log('got parent message -> ' + event.data);
+                console.log('from parent -> ' + event.data)
+                //开启房间                
+                mytool.connection.open(event.data, function () {
+                    showRoomURL(mytool.connection.sessionid);
+                });
+
+            }, false);
+            if(top!=window)
+                top.postMessage({action:'ready'}, '*')
+        })
     </script>
 </head>
 
@@ -72,33 +124,25 @@
         <div id="videos-container"></div>
     </section>
     <!-- 添加上传文件 -->
-    <form method="post" enctype="multipart/form-data" action="/file-upload"  target="uploadframe">
-	  <input type="text" name="username">
-	  <input type="password" name="password">
-	  <input type="file" name="file">
-	  <input type="submit">
-	  <iframe width="0" height="0" frameborder="0" style="display:none" scrolling="no" name="uploadframe" id="uploadframe"></iframe>
+    <form method="post" enctype="multipart/form-data" action="/file-upload" target="uploadframe">
+        <input type="text" name="username">
+        <input type="password" name="password">
+        <input type="file" name="file">
+        <input type="submit">
+        <iframe width="0" height="0" frameborder="0" style="display:none" scrolling="no" name="uploadframe" id="uploadframe"></iframe>
     </form>
-    
+
     <!-- 下载文件-->
-    <form method="post" action="/file-download"  target="downloadframe">
-        <input type='hidden' name='filePath' value='file-1534844385208.mp4'/>
+    <form method="post" action="/file-download" target="downloadframe">
+        <input type='hidden' name='filePath' value='file-1534844385208.mp4' />
         <input type="submit">
         <iframe width="0" height="0" frameborder="0" style="display:none" scrolling="no" name="downloadframe" id="uploadframe"></iframe>
     </form>
 
-    <script type="text/javascript" src="js/recorder.js"> </script>
-    <script src="/dist/RTCMultiConnection.js"></script>
-    <script src="/dev/adapter.js"></script>
-    <script src="/dev/myTool-backup.js"></script>
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- <iframe id="child" src="https://192.168.0.101:9002/demos/Video-Conferencing.html" allow="geolocation; microphone; camera"
+        width="700" height="600" /> -->
 
-    <!-- custom layout for HTML5 audio/video elements -->
-    <link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
-    <script src="/dev/getHTMLMediaElement.js"></script>
 
-    <script src="/dev/FileBufferReader.js"></script>
 
 
     <script>
@@ -146,7 +190,7 @@
                 mediaRecorder.stop();
             }
         }
-      
+
         document.getElementById('imgbutton').onclick = function (event) {
             document.getElementById('imginput').click();
             return false;
@@ -154,7 +198,7 @@
 
         document.getElementById('imginput').onchange = function (event) {
             var remoteName = document.getElementById('remote-id').value;
-            mytool.sendImg(event,remoteName);
+            mytool.sendImg(event, remoteName);
             //重置一下form元素，否则如果发同一张图片不会触发change事件
             // documnet.getElementById("resetform").reset();
         };
@@ -172,23 +216,23 @@
         document.getElementById('join-room').onclick = function () {
 
             var remote = document.getElementById('remote-id').value;
-            var remoteName=[];
+            var remoteName = [];
             remoteName.push(remote);
             mytool.openRoom(remoteName);
         };
 
         //open-conference
         document.getElementById('open-video-conference').onclick = function () {
-            
+
             var roomName = document.getElementById('room-name').value;
-            mytool.connection.open(mytool.connection.localUserid, function() {
-                    showRoomURL(mytool.connection.sessionid);
+            mytool.connection.open(roomName, function () {
+                showRoomURL(mytool.connection.sessionid);
             });
         };
 
         //video-conference
         document.getElementById('join-video-conference').onclick = function () {
-            
+
             var roomName = document.getElementById('room-name').value;
             mytool.connection.join(roomName)
         };
@@ -243,7 +287,7 @@
         document.getElementById('send-message').onclick = function (e) {
             var remoteName = document.getElementById('remote-id').value;
             var value = document.getElementById('input-text-chat').value;
-            mytool.sendMessage(value,remoteName);
+            mytool.sendMessage(value, remoteName);
 
         };
         mytool.connection.filesContainer = document.getElementById('file-container');

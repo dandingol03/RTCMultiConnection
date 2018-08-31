@@ -280,7 +280,6 @@ module.exports = exports = function (app, socketCallback) {
         /*
          *群聊接口
         */
-
         var roomInfo = [];
         //创建群聊时邀请的用户数不能少于3人
         socket.on("create-group", function (groupName, userId, userIds, callback) {
