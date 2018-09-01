@@ -482,6 +482,19 @@ module.exports = exports = function (app, socketCallback) {
             }
         })
 
+        //发送未读消息
+        var sendUnreadMessageInBatch=function(messages,userid){
+            if(messages!=null&&messages.length>0)
+            {
+                listOfUsers[userid].socket.emit("receive-message-group", messages);
+                //删除未读信息 
+                for(var i=0;i<messages.length;i++)
+                {
+                    Api.deleteUnreadContent(messages[i].id, userid);
+                }
+            }
+        }
+
         //接受客户端用户更新信息  edit by wqz
         socket.on('changed-uuid', function (newUserId, isTeamMember, callback) {
 
@@ -497,7 +510,11 @@ module.exports = exports = function (app, socketCallback) {
                 console.log(listOfUsers[newUserId].socket.rooms);
             })
             //用户注册时获取所有的未读聊天信息
-            Api.fetchMessegeUnread(newUserId).then((message) => {
+            Api.fetchMessegeUnread(newUserId).then((messages) => {
+
+                sendUnreadMessageInBatch(messages.data,newUserId)
+
+                return 
                 console.log(message.data.room_id + "房间id" + message.data.content + "message.sender_id");
                 console.log(message);
                 for (var i = 0; i < message.data.length; i++) {
@@ -526,6 +543,8 @@ module.exports = exports = function (app, socketCallback) {
                         listOfUsers[newUserId].socket.emit("receive-message", data);
                     }
                 }
+
+
             })
 
 

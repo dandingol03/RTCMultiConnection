@@ -402,7 +402,7 @@ var Api = {
             }
 
             for (var j = 0; j < contents.length; j++) {
-                promises.push(getRoomPromise(contents[j]))
+                promises.push(getRoomPromise(contents[j].get({plain:true})))
             }
             Q.all(promises).then((result) => {
 

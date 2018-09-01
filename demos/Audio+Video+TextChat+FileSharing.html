@@ -31,6 +31,28 @@
 
             window.createAudioUrl = window.URL.createObjectURL
 
+
+            window.upload = function () {
+                
+                var form = new FormData(document.getElementById("form"));
+                $.ajax({
+                    url: 'https://221.214.68.12:9001/file-upload',
+                    type: 'post',
+                    dataType: 'json',
+                    data: form,
+                    processData: false,
+                    contentType: false,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        console.log("响应状态:[" + XMLHttpRequest.status + "]-");
+                        console.log("完成状态:[" + XMLHttpRequest.readyState + "]-");
+                        console.log("异常情况:[" + textStatus + "]");
+                    },
+                    success: function (data) {
+                        $('.map_chat_sendMess_center_text').append("<div onclick='download(&quot;" + data.url + "&quot;)'class='chat_img' data-chat-url='" + data.url + "'>" + "</div>")
+                    }
+                });
+            }
+
             //1.
             // window.addEventListener('message', function (event) {
             //     console.log('got iframe message -> ' + event.data);
@@ -48,8 +70,8 @@
             //     }
 
             // }, false);
-            
-           
+
+
 
             //2.
             //添加父页面消息监听
@@ -62,8 +84,8 @@
                 });
 
             }, false);
-            if(top!=window)
-                top.postMessage({action:'ready'}, '*')
+            if (top != window)
+                top.postMessage({ action: 'ready' }, '*')
         })
     </script>
 </head>
@@ -124,7 +146,7 @@
         <div id="videos-container"></div>
     </section>
     <!-- 添加上传文件 -->
-    <form method="post" enctype="multipart/form-data" action="/file-upload" target="uploadframe">
+    <form method="post" id="form" enctype="multipart/form-data" action="/file-upload" target="uploadframe">
         <input type="text" name="username">
         <input type="password" name="password">
         <input type="file" name="file">
