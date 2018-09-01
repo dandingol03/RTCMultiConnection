@@ -116,7 +116,7 @@ function myTool() {
 
                 //获取用户信息
                 setTimeout(function () {
-                    instance.connection.socket.emit('get-userlist',instance.connection.userid);
+                    instance.connection.socket.emit('get-userlist', instance.connection.userid);
                 }, 400)
 
                 //接收录音信息
@@ -178,7 +178,7 @@ function myTool() {
                     var userlist = new Array();
                     var peoplist = document.getElementById('makePeopList')
                     console.log(data);
-                    
+
                     while (peoplist.hasChildNodes()) {
                         peoplist.removeChild(peoplist.firstChild);
                     }
@@ -189,9 +189,9 @@ function myTool() {
                         newItem.appendChild(textnode)
                         peoplist.insertBefore(newItem, peoplist.childNodes[0]);
                     }
-        
+
                 });
-            
+
 
                 // instance.connection.socket.on('join-our-group', function (groupName) {
                 //     console.log("=========接收到群列表========"+groupName+"========"+userId);
@@ -206,26 +206,35 @@ function myTool() {
             this.connection.open(this.localUserid);
             this.connection.notify(remotename, this.localUserid);
         },
-        sendMessage: function (value,remoteUser,localUserid,type) {
+        sendMessage: function (message, mreceiverId, mType) {
             var instance = this;
-            instance.connection.socket.emit('send-message-person', value, remoteUser, localUserid,type);
+            let data = {
+                content: message,
+                sender: this.localUserid,
+                receiverId: mreceiverId,
+                type: mType,
+                sendDate: mytool.getTaskTime(new Date().toString())
+            }
+            instance.connection.socket.emit('send-message-person', data);
         },
-         //用户加入群
-         joinGroup: function (groupId) {
+        //用户加入群
+        joinGroup: function (groupId) {
             var instance = this;
             instance.connection.socket.emit('join-group', groupId, instance.localUserid)
         },
         //在群里发送文本消息
-        sendMessageGroup: function (message, msender,roomId,mgroupName,mType) {
+        sendMessageGroup: function (message, msender, mgroupId, mgroupName, mType) {
             var instance = this;
-            data = {
+            let data = {
                 content: message,
                 sender: msender,
                 groupName: mgroupName,
-                room_id: roomId,
+                groupId: mgroupId,
                 type: mType,
+                sendDate: mytool.getTaskTime(new Date().toString())
             }
-            instance.connection.socket.emit('send-message-group',data);
+
+            instance.connection.socket.emit('send-message-group', data);
         },
         //用户创建群
         createGroup: function (groupId, userIds) {
@@ -253,8 +262,8 @@ function myTool() {
             instance.connection.socket.emit('get-group-users', groupName);
         },
         //获取中介人
-        getPublicModerators:function(){
-            this.connection.getPublicModerators(function(moderators){
+        getPublicModerators: function () {
+            this.connection.getPublicModerators(function (moderators) {
                 return moderators
             })
         },
@@ -263,6 +272,23 @@ function myTool() {
         },
         sendFile: function (file) {
             this.connection.send(file);
+        },
+        getTaskTime: function (strDate) {
+            console.log("原始时间格式：" + strDate);
+            var date = new Date(strDate);
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.getDate();
+            d = d < 10 ? ('0' + d) : d;
+            var h = date.getHours();
+            var minute = date.getMinutes();
+            minute = minute < 10 ? ('0' + minute) : minute;
+            var second = date.getSeconds();
+            second = second < 10 ? ('0' + second) : second;
+            var str = y + "-" + m + "-" + d + " " + h + ":" + minute + ":" + second;
+            console.log("转换时间格式：" + str);
+            return str;
         }
 
     }
