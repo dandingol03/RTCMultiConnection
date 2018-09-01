@@ -344,7 +344,6 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
             chatType: mChatType
         }
         //messageType为1时，为单人聊天
-        console.log("单人++++++++++" + chatType + "+++");
         var userIds = [];
         userIds.push(sender);
         userIds.push(receiver);
