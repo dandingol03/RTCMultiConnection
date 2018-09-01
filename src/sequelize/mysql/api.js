@@ -24,14 +24,14 @@ var Api = {
         return mysql.RelationShip.bulkCreate(creates, { transaction: t })
     },
     //插入消息记录
-    insertContent: (room_id, sender_id, content, userIds, type,chatType, t) => {
+    insertContent: (room_id, sender_id, content, userIds, type,chatType,date, t) => {
         var room_user_ids = ''
         for (var i = 0; i < userIds.length; i++) {
             room_user_ids += userIds[i]
             if (i != userIds.length - 1)
                 room_user_ids += ','
         }
-        return mysql.Content.create({ room_id, sender_id, content, type, room_user_ids,chat_type: chatType, send_date: Api.getTaskTime(new Date().toString()) }, { transaction: t })
+        return mysql.Content.create({ room_id, sender_id, content, type, room_user_ids,chat_type: chatType, send_date: date }, { transaction: t })
     },
     //删除关系记录
     deleteRelation: (room_id, userIds, t) => {
@@ -339,10 +339,10 @@ var Api = {
         return deferred.promise
     },
     //发送组消息和发送一对一消息都用此接口
-    sendGroupMessage: (room_id, sender_id, content, userIds, type,chatType) => {
+    sendGroupMessage: (room_id, sender_id, content, userIds, type,chatType,date) => {
         var deferred = Q.defer()
         mysql.sequelize.transaction().then((t) => {
-            Api.insertContent(room_id, sender_id, content, userIds, type,chatType, t).then((res) => {
+            Api.insertContent(room_id, sender_id, content, userIds, type,chatType,date, t).then((res) => {
                 deferred.resolve({ re: 1 })
                 t.commit()
             }).catch((e) => {

@@ -43,11 +43,9 @@ module.exports = exports = function (app, socketCallback) {
                 }
                 tempuserlist.push(temp);
             }
+            console.log(tempuserlist);
             io.emit('return-userlist', 1, tempuserlist);
-            
         }
-
-
 
         try {
             // use latest socket.io
@@ -249,25 +247,31 @@ module.exports = exports = function (app, socketCallback) {
 
         //单聊接口
         //接收文本消息 edit by wqz
-        socket.on('send-message-person', function (message, remoteUserId, userId, mType, callback) {
+        socket.on('send-message-person', function (newMessage, callback) {
             var userIds = [];
             var mchatType = 1;
-            userIds.push(userId);
-            userIds.push(remoteUserId);
+            var message = newMessage.content;
+            var sender = newMessage.sender;
+            var mType = newMessage.type;
+            var receiverId =newMessage.receiverId;
+            var sendDate = newMessage.sendDate;
+          
+            userIds.push(sender);
+            userIds.push(receiverId);
             //创建1vs1的聊天室，返回房间id(若已经创建,返回房间名）
             var data = {};
             data = {
                 content: message,
-                sender_id: userId,
+                sender_id: sender,
                 type: mType,
-                send_date: Api.getTaskTime(new Date().toString()),
+                send_date: sendDate,
                 chatType: mchatType
             }
             Api.createRoomWithoutName(userIds).then((roomId) => {
-                if (listOfUsers[remoteUserId] != null) {
-                    listOfUsers[remoteUserId].socket.emit('receive-message', data)
+                if (listOfUsers[receiverId] != null) {
+                    listOfUsers[receiverId].socket.emit('receive-message', data)
                 } else {
-                    Api.sendGroupMessage(roomId.data.id, userId, message, [remoteUserId], mType, mchatType);
+                    Api.sendGroupMessage(roomId.data.id, sender, message, [receiverId], mType, mchatType, sendDate);
                 }
 
                 if (callback) {
@@ -402,13 +406,14 @@ module.exports = exports = function (app, socketCallback) {
         })
 
 
-        //群聊消息 message文本消息，groupId群名，sender发送人，type消息类型
+        //群聊消息 message文本消息，groupId群名，sender发送人，type消息类型,date消息发送时间
         socket.on('send-message-group', function (newMessage, callback) {
-            var message = newMessage.message
+            var message = newMessage.content;
             var room = newMessage.groupName;
             var roomId = newMessage.groupId;
             var sender = newMessage.sender;
             var mType = newMessage.type;
+            var sendDate = newMessage.sendDate;
             var mchatType = 2;  //群聊的chatType 为2
             var data;
             data = {
@@ -417,9 +422,9 @@ module.exports = exports = function (app, socketCallback) {
                 room_id: roomId,
                 chatType: mchatType,
                 type: mType,
-                send_date: Api.getTaskTime(new Date().toString())
+                send_date: sendDate
             }
-            if (message && room && roomId && sender && mType ) {
+            if (message && room && roomId && sender && mType) {
                 socket.to(room).emit('receive-message-group', data);
                 if (callback) {
                     callback(true);
@@ -448,12 +453,14 @@ module.exports = exports = function (app, socketCallback) {
                     }
                     console.log(roomId.id);
                     if (leaveUsers != null) {
-                        Api.sendGroupMessage(roomId, sender, message, leaveUsers, mType, mchatType).then(() => {
+                        Api.sendGroupMessage(roomId, sender, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
                     }
                 })
             } else {
-                callback(false);
+                if (callback) {
+                    callback(false);
+                }
             }
         })
 
