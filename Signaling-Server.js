@@ -460,6 +460,9 @@ module.exports = exports = function (app, socketCallback) {
                         Api.sendGroupMessage(roomId, senderId,senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
                     }
+                    if (callback) {
+                        callback(true);
+                    }
                 })
             } else {
                 if (callback) {
