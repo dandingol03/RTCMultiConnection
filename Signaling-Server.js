@@ -251,18 +251,20 @@ module.exports = exports = function (app, socketCallback) {
             var userIds = [];
             var mchatType = 1;
             var message = newMessage.content;
-            var sender = newMessage.sender;
+            var senderId = newMessage.senderId;
             var mType = newMessage.type;
             var receiverId =newMessage.receiverId;
             var sendDate = newMessage.sendDate;
-          
-            userIds.push(sender);
+            var senderName =  newMessage.senderName;
+
+            userIds.push(senderId);
             userIds.push(receiverId);
             //创建1vs1的聊天室，返回房间id(若已经创建,返回房间名）
             var data = {};
             data = {
                 content: message,
-                sender_id: sender,
+                sender_id: senderId,
+                sender_name:senderName,
                 type: mType,
                 send_date: sendDate,
                 chatType: mchatType
@@ -271,7 +273,7 @@ module.exports = exports = function (app, socketCallback) {
                 if (listOfUsers[receiverId] != null) {
                     listOfUsers[receiverId].socket.emit('receive-message', data)
                 } else {
-                    Api.sendGroupMessage(roomId.data.id, sender, message, [receiverId], mType, mchatType, sendDate);
+                    Api.sendGroupMessage(roomId.data.id, senderId,senderName,message, [receiverId], mType, mchatType, sendDate);
                 }
 
                 if (callback) {
@@ -411,20 +413,22 @@ module.exports = exports = function (app, socketCallback) {
             var message = newMessage.content;
             var room = newMessage.groupName;
             var roomId = newMessage.groupId;
-            var sender = newMessage.sender;
+            var senderId = newMessage.senderId;
+            var senderName =  newMessage.senderName;
             var mType = newMessage.type;
             var sendDate = newMessage.sendDate;
             var mchatType = 2;  //群聊的chatType 为2
             var data;
             data = {
                 content: message,
-                sender_id: sender,
+                sender_id: senderId,
+                sender_name:senderName,
                 room_id: roomId,
                 chatType: mchatType,
                 type: mType,
                 send_date: sendDate
             }
-            if (message && room && roomId && sender && mType) {
+            if (message && room && roomId && senderId && mType) {
                 socket.to(room).emit('receive-message-group', data);
                 if (callback) {
                     callback(true);
@@ -453,7 +457,7 @@ module.exports = exports = function (app, socketCallback) {
                     }
                     console.log(roomId.id);
                     if (leaveUsers != null) {
-                        Api.sendGroupMessage(roomId, sender, message, leaveUsers, mType, mchatType, sendDate).then(() => {
+                        Api.sendGroupMessage(roomId, senderId,senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
                     }
                 })
