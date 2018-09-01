@@ -66,6 +66,14 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     console.log()
     // })
 
+    // Api.fetchMessegeUnread('u0001').then((messages)=>{
+    //         console.log(messages.data[0])
+    //     })
+
+    Api.getGroupChatRooms('u0001').then((roomIds)=>{
+        console.log()
+    })
+
 
 }).catch(function (err) {
     console.log("Server failed to start due to error: %s", err);
@@ -178,7 +186,59 @@ var jsonParser = bodyParser.json()
 // 创建 application/x-www-form-urlencoded 解析
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
+
+
+
 //业务route处理
+
+//下载文件
+expressRoute.get('/file-download', urlencodedParser, function (request, response) {
+
+    //路径
+    var filePath = request.query.filePath
+    //获取文件名
+    var reg = /.*\/(.*)?/
+    var regResult = reg.exec(filePath)
+    var filename = null
+    if (regResult != null && regResult[1] != null)
+        filename = regResult[1]
+    else
+        filename = filePath
+
+    var wholePath = path.resolve(__dirname, 'uploads')
+    wholePath = path.join(wholePath, filePath)
+    //判断文件是否存在
+    fs.exists(wholePath, exists => {
+        if (!exists) {
+            response.end(500, {
+                'Content-Type': 'application/force-download',
+                'Content-Disposition': 'attachment; filename=' + filename
+            })
+            return
+        }
+        //读取文件大小
+        fs.stat(wholePath, (err, stats) => {
+            if (err) {
+                response.write(500, {
+                    'Content-Type': 'application/force-download',
+                    'Content-Disposition': 'attachment; filename=' + filename
+                })
+                return
+            }
+            var fileSize = stats.size
+            //创建流
+            var f = fs.createReadStream(wholePath)
+            response.writeHead(200, {
+                'Content-Length': fileSize,
+                'Content-Type': 'application/force-download',
+                'Content-Disposition': 'attachment;filename=' + filename
+            });
+            f.pipe(response);
+        })
+    })
+})
+
+
 expressRoute.get('/*', function (request, response) {
     try {
         var uri = url.parse(request.url).pathname,
@@ -472,12 +532,9 @@ expressRoute.post('/file-download', urlencodedParser, function (request, respons
                 'Content-Type': 'application/force-download',
                 'Content-Disposition': 'attachment;filename=' + filename
             });
-
             f.pipe(response);
         })
-
     })
-
 })
 
 
