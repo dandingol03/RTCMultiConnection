@@ -9,6 +9,9 @@ module.exports = function(sequelize,DataTypes){
         sender_id:{
             type:DataTypes.STRING
         },
+        sender_name:{
+            type:DataTypes.STRING
+        },
         room_id:{
             type:DataTypes.INTEGER
         },
