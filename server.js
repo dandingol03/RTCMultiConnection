@@ -459,12 +459,8 @@ var sendFileMessage = function (file, senderId, senderName, receiver, Type, mCha
             if (Memory.listOfUsers[reiceiver] != null) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
-            } else {
-<<<<<<< HEAD
-                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver], Type, mChatType);
-=======
+            } else {                
                 Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiver], Type, mChatType, sendDate);
->>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
             }
         });
     } else {
