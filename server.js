@@ -498,13 +498,10 @@ var sendFileMessage = function (file, senderId, senderName, receiver, Type, mCha
                 }
                 console.log(roomId.id);
                 if (leaveUsers != null) {
-<<<<<<< HEAD
-                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type, mChatType).then(() => {
-                        Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
-=======
+
                     Api.sendGroupMessage(roomId.id, senderId, senderName, message, leaveUsers, Type, mChatType, sendDate).then(() => {
                         Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
->>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
+
                     })
                 } else {
                     Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
