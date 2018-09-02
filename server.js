@@ -70,8 +70,9 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //         console.log(messages.data[0])
     //     })
 
-    Api.getGroupChatRooms('u0001').then((roomIds)=>{
-        console.log()
+    Api.fetchMessegeUnread('user_1506589113190').then((roomIds) => {
+        console.log('=======roomIds======')
+        console.log(roomIds)
     })
 
 
@@ -191,6 +192,12 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
 
     //路径
     var filePath = request.query.filePath
+    
+    if (filePath == undefined || filePath == null || filePath == 'null'||filePath=='') {
+        response.end(404)
+        return
+    }
+
     //获取文件名
     var reg = /.*\/(.*)?/
     var regResult = reg.exec(filePath)
@@ -199,16 +206,16 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         filename = regResult[1]
     else
         filename = filePath
+    
+    var mimeType=null
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
     //判断文件是否存在
     fs.exists(wholePath, exists => {
         if (!exists) {
-            response.end(500, {
-                'Content-Type': 'application/force-download',
-                'Content-Disposition': 'attachment; filename=' + filename
-            })
+            response.writeHead(404, {'Content-type' : 'application/text'});
+            response.end('')
             return
         }
         //读取文件大小
@@ -454,7 +461,7 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
             } else {
-                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver],Type,mChatType);
+                Api.sendGroupMessage(roomId.data.id, sender, message, [receiver], Type, mChatType);
             }
         });
     } else {
@@ -491,7 +498,7 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
                 }
                 console.log(roomId.id);
                 if (leaveUsers != null) {
-                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type,mChatType).then(() => {
+                    Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type, mChatType).then(() => {
                         Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
                     })
                 } else {
@@ -524,7 +531,7 @@ expressRoute.post('/file-upload', function (request, response) {
         var receiver = request.body.receiver;
         var type = request.body.type;
         var mChatType = request.body.chatType;
-        sendFileMessage(file.filename, sender, receiver, type,mChatType);
+        sendFileMessage(file.filename, sender, receiver, type, mChatType);
     })
 
 })
