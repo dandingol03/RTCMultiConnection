@@ -70,9 +70,11 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //         console.log(messages.data[0])
     //     })
 
+
     Api.fetchMessegeUnread('user_1506589113190').then((roomIds) => {
         console.log('=======roomIds======')
         console.log(roomIds)
+
     })
 
 
@@ -436,32 +438,33 @@ expressRoute.get('/*', function (request, response) {
 
 
 //todo:发送文件消息的业务逻辑,由wqz完成 
-var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
-    // console.log(Memory.listOfUsers)
-    // var socket=Memory.listOfUsers.danding.socket
-    // socket.emit('receive-test','hello ')
+var sendFileMessage = function (file, senderId, senderName, receiver, Type, mChatType, sendDate) {
 
     var message = file
-    console.log("++++++++++" + message + "++++++++++++" + sender + "++++++++++" + receiver + "+++++" + Type)
     if (mChatType == 1) {
         var data;
         data = {
-            content: file,
-            sender_id: sender,
+            content: message,
+            sender_id: senderId,
+            sender_name: senderName,
+            send_date: sendDate,
             type: Type,
-            send_date: Api.getTaskTime(new Date().toString()),
             chatType: mChatType
         }
         //messageType为1时，为单人聊天
         var userIds = [];
-        userIds.push(sender);
+        userIds.push(senderId);
         userIds.push(receiver);
         Api.createRoomWithoutName(userIds).then((roomId) => {
             if (Memory.listOfUsers[reiceiver] != null) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
             } else {
+<<<<<<< HEAD
                 Api.sendGroupMessage(roomId.data.id, sender, message, [receiver], Type, mChatType);
+=======
+                Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiver], Type, mChatType, sendDate);
+>>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
             }
         });
     } else {
@@ -490,19 +493,25 @@ var sendFileMessage = function (file, sender, receiver, Type, mChatType) {
                 //将未读信息写进数据库
                 data = {
                     content: file,
-                    sender_id: sender,
+                    sender_id: senderId,
+                    sender_name: senderName,
                     type: Type,
                     room_id: roomId.id,
-                    send_date: Api.getTaskTime(new Date().toString()),
+                    send_date: sendDate,
                     chatType: mChatType
                 }
                 console.log(roomId.id);
                 if (leaveUsers != null) {
+<<<<<<< HEAD
                     Api.sendGroupMessage(roomId.id, sender, message, leaveUsers, Type, mChatType).then(() => {
                         Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
+=======
+                    Api.sendGroupMessage(roomId.id, senderId, senderName, message, leaveUsers, Type, mChatType, sendDate).then(() => {
+                        Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
+>>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
                     })
                 } else {
-                    Memory.listOfUsers[sender].socket.to(receiver).emit('receive-message-group', data);
+                    Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
                 }
 
             })
@@ -520,18 +529,24 @@ expressRoute.post('/file-upload', function (request, response) {
     console.log('...========.')
     var up = upload.single('file')
     console.log("request=========")
-    console.log(request.file);
+    // console.log(request.file);
     up(request, response, function (err) {
         var file = request.file
         console.log(file)
         response.writeHead(200, { "Content-Type": "application/json" })
         response.end(JSON.stringify({ re: 1, url: file.filename }));
 
-        var sender = request.body.sender;
+        var senderId = request.body.senderId;
+        var senderName = request.body.senderName;
+        var sendDate = request.body.sendDate;
         var receiver = request.body.receiver;
         var type = request.body.type;
         var mChatType = request.body.chatType;
+<<<<<<< HEAD
         sendFileMessage(file.filename, sender, receiver, type, mChatType);
+=======
+        sendFileMessage(file.filename, senderId, senderName, receiver, type, mChatType, sendDate);
+>>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
     })
 
 })

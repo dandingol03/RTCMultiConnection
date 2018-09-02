@@ -151,8 +151,8 @@ function myTool() {
 
                 });
                 //接收群消息 
-                instance.connection.socket.on('receive-message-group', function (groupId, message) {
-                    console.log("=========接收到群消息========" + groupId + "+++++++++++" + message)
+                instance.connection.socket.on('receive-message-group', function ( message) {
+                    console.log("=========接收到群消息========" + message )
                 });
                 //接收用户所在的所有群的名字
                 instance.connection.socket.on('receive-group-list', function (groupId, message) {
@@ -206,11 +206,13 @@ function myTool() {
             this.connection.open(this.localUserid);
             this.connection.notify(remotename, this.localUserid);
         },
+        //单聊发送消息
         sendMessage: function (message, mreceiverId, mType) {
             var instance = this;
             let data = {
                 content: message,
-                sender: this.localUserid,
+                senderId: this.localUserid,
+                senderName: "测试",
                 receiverId: mreceiverId,
                 type: mType,
                 sendDate: mytool.getTaskTime(new Date().toString())
@@ -227,7 +229,8 @@ function myTool() {
             var instance = this;
             let data = {
                 content: message,
-                sender: msender,
+                senderId: msender,
+                senderName: "测试",
                 groupName: mgroupName,
                 groupId: mgroupId,
                 type: mType,
