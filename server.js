@@ -535,11 +535,9 @@ expressRoute.post('/file-upload', function (request, response) {
         var receiver = request.body.receiver;
         var type = request.body.type;
         var mChatType = request.body.chatType;
-<<<<<<< HEAD
         sendFileMessage(file.filename, sender, receiver, type, mChatType);
-=======
         sendFileMessage(file.filename, senderId, senderName, receiver, type, mChatType, sendDate);
->>>>>>> 8ba4f08ffc4a3905ed5a27e78088313627790e63
+
     })
 
 })
