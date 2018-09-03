@@ -224,6 +224,9 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
             case 'mp4':
                 mimeType='video/mpeg4'
             break;
+            case 'amr':
+                mimeType='audio/amr'
+            break;
         }
     }
     
