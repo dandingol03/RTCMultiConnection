@@ -43,7 +43,7 @@ module.exports = exports = function (app, socketCallback) {
                 }
                 tempuserlist.push(temp);
             }
-            console.log(tempuserlist);
+            
             io.emit('return-userlist', 1, tempuserlist);
         }
 
@@ -501,7 +501,6 @@ module.exports = exports = function (app, socketCallback) {
             if(messages!=null&&messages.length>0)
             {
                 listOfUsers[userid].socket.emit("receive-message-unread", messages);
-                return
                 //删除未读信息 
                 for(var i=0;i<messages.length;i++)
                 {

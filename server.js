@@ -208,8 +208,25 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         filename = regResult[1]
     else
         filename = filePath
+
+    var suffix=null
+    var mimeType='application/force-download'
+    if(filename.indexOf('.')!=-1)
+    {
+        suffix=filename.substring(filename.lastIndexOf('.')+1)
+        switch(suffix){
+            case 'jpg':
+                mimeType='img/jpeg'
+            break;
+            case 'png':
+                mimeType='image/png'
+            break;
+            case 'mp4':
+                mimeType='video/mpeg4'
+            break;
+        }
+    }
     
-    var mimeType=null
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
@@ -234,7 +251,7 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
             var f = fs.createReadStream(wholePath)
             response.writeHead(200, {
                 'Content-Length': fileSize,
-                'Content-Type': 'application/force-download',
+                'Content-Type': mimeType,
                 'Content-Disposition': 'attachment;filename=' + filename
             });
             f.pipe(response);
