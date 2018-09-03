@@ -424,6 +424,7 @@ module.exports = exports = function (app, socketCallback) {
                 sender_id: senderId,
                 sender_name:senderName,
                 room_id: roomId,
+                room_name:room,
                 chatType: mchatType,
                 type: mType,
                 send_date: sendDate
