@@ -169,6 +169,7 @@ var Api = {
     //群聊创建房间
     createRoom: (name, userIds, type) => {
         var deferred = Q.defer()
+        var roomData = {};
         Api.getRoomInfo(name).then((room) => {
 
             if (room == null) {
@@ -178,10 +179,12 @@ var Api = {
                     mysql.RoomInfo.create({ name: name, create_date: Api.getTaskTime(new Date().toString()), remark: "2" }, { transaction: t })
                         .then((room) => {
                             //加入关系时  关系表中群聊type=2
+                            roomData = room;
                             return Api.insertRelation(room.id, userIds, "2", t)
+                           
                         }).then(() => {
                             t.commit()
-                            deferred.resolve({ re: 1 })
+                            deferred.resolve({ re: 1,data: roomData.id })
                         }).catch((e) => {
                             t.rollback()
                             deferred.reject({ re: -1, data: '创建房间失败' })
