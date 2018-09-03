@@ -227,6 +227,7 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         }
     }
     
+    console.log('mime===='+mimeType)
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
