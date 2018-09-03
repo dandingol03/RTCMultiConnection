@@ -234,8 +234,8 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
     //判断文件是否存在
     fs.exists(wholePath, exists => {
         if (!exists) {
-            response.writeHead(404, {'Content-type' : 'application/text'});
-            response.end('')
+            response.writeHead(500, {'Content-type' : 'application/text'});
+            response.end("png doesn't exist ")
             return
         }
         //读取文件大小
