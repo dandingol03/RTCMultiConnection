@@ -107,8 +107,8 @@ try {
 } catch (e) { }
 
 
-var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.key')));
-var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.pem')));
+var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
+var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
 var ssl_cabundle = null;
 
 // force auto reboot on failures
@@ -194,8 +194,8 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
 
     //路径
     var filePath = request.query.filePath
-
-    if (filePath == undefined || filePath == null || filePath == 'null' || filePath == '') {
+    
+    if (filePath == undefined || filePath == null || filePath == 'null'||filePath=='') {
         response.end(404)
         return
     }
@@ -209,34 +209,35 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
     else
         filename = filePath
 
-    var suffix = null
-    var mimeType = 'application/force-download'
-    if (filename.indexOf('.') != -1) {
-        suffix = filename.substring(filename.lastIndexOf('.') + 1)
-        switch (suffix) {
+    var suffix=null
+    var mimeType='application/force-download'
+    if(filename.indexOf('.')!=-1)
+    {
+        suffix=filename.substring(filename.lastIndexOf('.')+1)
+        switch(suffix){
             case 'jpg':
-                mimeType = 'img/jpeg'
-                break;
+                mimeType='img/jpeg'
+            break;
             case 'png':
-                mimeType = 'image/png'
-                break;
+                mimeType='image/png'
+            break;
             case 'mp4':
-                mimeType = 'video/mpeg4'
-                break;
+                mimeType='video/mpeg4'
+            break;
             case 'amr':
-                mimeType = 'audio/amr'
-                break;
+                mimeType='audio/amr'
+            break;
         }
     }
-
-    console.log('mime====' + mimeType)
+    
+    console.log('mime===='+mimeType)
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
     //判断文件是否存在
     fs.exists(wholePath, exists => {
         if (!exists) {
-            response.writeHead(500, { 'Content-type': 'application/text' });
+            response.writeHead(500, {'Content-type' : 'application/text'});
             response.end("png doesn't exist ")
             return
         }
@@ -533,6 +534,7 @@ var sendFileMessage = function (file, newMessage) {
     }
 
 }
+
 
 
 
