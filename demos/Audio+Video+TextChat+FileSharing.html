@@ -33,7 +33,7 @@
 
 
             window.upload = function () {
-                
+
                 var form = new FormData(document.getElementById("form"));
                 $.ajax({
                     url: 'https://221.214.68.12:9001/file-upload',
@@ -71,6 +71,13 @@
 
             // }, false);
 
+            window.downloadPlugin = function () {
+                var voiceUrl = '/file-download?filePath=' + "file-1535774045286.mp4"
+                var iframe = document.createElement("iframe");
+                document.body.appendChild(iframe);
+                iframe.src = voiceUrl;
+                iframe.style.display = "none";
+            }
 
 
             //2.
@@ -298,7 +305,6 @@
         };
 
 
-
         document.getElementById('share-file').onclick = function () {
             var fileSelector = new FileSelector();
             fileSelector.selectSingleFile(function (file) {
@@ -314,9 +320,11 @@
         };
         mytool.connection.filesContainer = document.getElementById('file-container');
 
-
-
-
+        window.upKeyFlag=false
+        window.leftKeyFlag=false
+        window.rightKeyFlag=false
+    
+        window.playFlag=true
     </script>
 </body>
 

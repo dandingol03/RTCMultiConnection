@@ -194,8 +194,8 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
 
     //路径
     var filePath = request.query.filePath
-    
-    if (filePath == undefined || filePath == null || filePath == 'null'||filePath=='') {
+
+    if (filePath == undefined || filePath == null || filePath == 'null' || filePath == '') {
         response.end(404)
         return
     }
@@ -209,35 +209,34 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
     else
         filename = filePath
 
-    var suffix=null
-    var mimeType='application/force-download'
-    if(filename.indexOf('.')!=-1)
-    {
-        suffix=filename.substring(filename.lastIndexOf('.')+1)
-        switch(suffix){
+    var suffix = null
+    var mimeType = 'application/force-download'
+    if (filename.indexOf('.') != -1) {
+        suffix = filename.substring(filename.lastIndexOf('.') + 1)
+        switch (suffix) {
             case 'jpg':
-                mimeType='img/jpeg'
-            break;
+                mimeType = 'img/jpeg'
+                break;
             case 'png':
-                mimeType='image/png'
-            break;
+                mimeType = 'image/png'
+                break;
             case 'mp4':
-                mimeType='video/mpeg4'
-            break;
+                mimeType = 'video/mpeg4'
+                break;
             case 'amr':
-                mimeType='audio/amr'
-            break;
+                mimeType = 'audio/amr'
+                break;
         }
     }
-    
-    console.log('mime===='+mimeType)
+
+    console.log('mime====' + mimeType)
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
     //判断文件是否存在
     fs.exists(wholePath, exists => {
         if (!exists) {
-            response.writeHead(500, {'Content-type' : 'application/text'});
+            response.writeHead(500, { 'Content-type': 'application/text' });
             response.end("png doesn't exist ")
             return
         }
@@ -480,7 +479,7 @@ var sendFileMessage = function (file, senderId, senderName, receiver, Type, mCha
             if (Memory.listOfUsers[reiceiver] != null) {
 
                 Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
-            } else {                
+            } else {
                 Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiver], Type, mChatType, sendDate);
             }
         });
@@ -894,3 +893,5 @@ if (autoRebootServerOnFailure) {
 } else {
     runServer();
 }
+
+
