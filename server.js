@@ -107,8 +107,8 @@ try {
 } catch (e) { }
 
 
-var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
-var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
+var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.key')));
+var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.pem')));
 var ssl_cabundle = null;
 
 // force auto reboot on failures
@@ -458,35 +458,54 @@ expressRoute.get('/*', function (request, response) {
 
 
 //todo:发送文件消息的业务逻辑,由wqz完成 
-var sendFileMessage = function (file, senderId, senderName, receiver, Type, mChatType, sendDate) {
-
+var sendFileMessage = function (file, newMessage) {
+    var room = newMessage.groupName;
+    var senderId = newMessage.senderId;
+    var senderName = newMessage.senderName;
+    var mType = newMessage.type;
+    var receiverId = newMessage.receiverId;
+    var receiverName = newMessage.receiverName;
+    var mChatType = newMessage.chatType;
+    var sendDate = newMessage.sendDate;
     var message = file
     if (mChatType == 1) {
-        var data;
+        //单聊
+        var data = {};
         data = {
             content: message,
             sender_id: senderId,
             sender_name: senderName,
+            type: mType,
             send_date: sendDate,
-            type: Type,
             chatType: mChatType
         }
         //messageType为1时，为单人聊天
         var userIds = [];
         userIds.push(senderId);
-        userIds.push(receiver);
+        userIds.push(receiverId);
         Api.createRoomWithoutName(userIds).then((roomId) => {
-            if (Memory.listOfUsers[reiceiver] != null) {
-
-                Memory.listOfUsers[reiceiver].socket.emit('receive-message', data);
+            if (Memory.listOfUsers[receiverId] != null) {
+                Memory.listOfUsers[receiverId].socket.emit('receive-message', data)
             } else {
-                Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiver], Type, mChatType, sendDate);
+                Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mChatType, sendDate);
             }
         });
-    } else {
+    } else if (mChatType == 2) {
         //多人聊天
         //messageType为2时，为群聊
-        Api.getRoomMember(receiver).then((userIds) => {
+        var data = {};
+        data = {
+            content: message,
+            sender_id: senderId,
+            sender_name: senderName,
+            room_id: receiverId,
+            room_name: receiverName,
+            chatType: mChatType,
+            type: mType,
+            send_date: sendDate
+        }
+        Memory.listOfUsers[senderId].socket.to(receiverName).emit('receive-message-group', data);
+        Api.getRoomMember(receiverName).then((userIds) => {
             console.log(userIds);
             //获取当前群所有的成员
             var users = [];
@@ -505,29 +524,9 @@ var sendFileMessage = function (file, senderId, senderName, receiver, Type, mCha
                     console.log(error);
                 }
             }
-            Api.getRoomInfo(receiver).then((roomId) => {
-                //将未读信息写进数据库
-                data = {
-                    content: file,
-                    sender_id: senderId,
-                    sender_name: senderName,
-                    type: Type,
-                    room_id: roomId.id,
-                    send_date: sendDate,
-                    chatType: mChatType
-                }
-                console.log(roomId.id);
-                if (leaveUsers != null) {
-
-                    Api.sendGroupMessage(roomId.id, senderId, senderName, message, leaveUsers, Type, mChatType, sendDate).then(() => {
-                        Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
-
-                    })
-                } else {
-                    Memory.listOfUsers[senderId].socket.to(receiver).emit('receive-message-group', data);
-                }
-
-            })
+            if (leaveUsers != null) {
+                Api.sendGroupMessage(receiverId, senderId, senderName, message, leaveUsers, mType, mChatType, sendDate);
+            }
         })
 
     }
@@ -548,17 +547,22 @@ expressRoute.post('/file-upload', function (request, response) {
         console.log(file)
         response.writeHead(200, { "Content-Type": "application/json" })
         response.end(JSON.stringify({ re: 1, url: file.filename }));
-
-        var senderId = request.body.senderId;
-        var senderName = request.body.senderName;
-        var sendDate = request.body.sendDate;
-        var receiver = request.body.receiver;
-        var type = request.body.type;
-        var mChatType = request.body.chatType;
-        sendFileMessage(file.filename, senderId, senderName, receiver, type, mChatType, sendDate);
-
+        var message = {};
+        if (request.body.type == "audio") {
+            var data = {
+                duration: request.body.duration,
+                url: file.filename
+            }
+            message = JSON.stringify(data);
+        }
+        else {
+            message = file.filename;
+        }
+        //上传内容不能为空
+        if (request.body && message) {
+            sendFileMessage(message, request.body);
+        }
     })
-
 })
 
 

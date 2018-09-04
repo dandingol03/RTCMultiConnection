@@ -43,7 +43,7 @@ module.exports = exports = function (app, socketCallback) {
                 }
                 tempuserlist.push(temp);
             }
-            
+            console.log(tempuserlist);
             io.emit('return-userlist', 1, tempuserlist);
         }
 
@@ -249,13 +249,13 @@ module.exports = exports = function (app, socketCallback) {
         //接收文本消息 edit by wqz
         socket.on('send-message-person', function (newMessage, callback) {
             var userIds = [];
-            var mchatType = 1;
+            var mchatType = newMessage.chatType;
             var message = newMessage.content;
             var senderId = newMessage.senderId;
             var mType = newMessage.type;
-            var receiverId =newMessage.receiverId;
+            var receiverId = newMessage.receiverId;
             var sendDate = newMessage.sendDate;
-            var senderName =  newMessage.senderName;
+            var senderName = newMessage.senderName;
 
             userIds.push(senderId);
             userIds.push(receiverId);
@@ -264,7 +264,7 @@ module.exports = exports = function (app, socketCallback) {
             data = {
                 content: message,
                 sender_id: senderId,
-                sender_name:senderName,
+                sender_name: senderName,
                 type: mType,
                 send_date: sendDate,
                 chatType: mchatType
@@ -273,7 +273,7 @@ module.exports = exports = function (app, socketCallback) {
                 if (listOfUsers[receiverId] != null) {
                     listOfUsers[receiverId].socket.emit('receive-message', data)
                 } else {
-                    Api.sendGroupMessage(roomId.data.id, senderId,senderName,message, [receiverId], mType, mchatType, sendDate);
+                    Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mchatType, sendDate);
                 }
 
                 if (callback) {
@@ -286,34 +286,24 @@ module.exports = exports = function (app, socketCallback) {
         /*
          *群聊接口
         */
-        var roomInfo = [];
+        var state = {};
         //创建群聊时邀请的用户数不能少于3人
         socket.on("create-group", function (groupName, userId, userIds, callback) {
             var roomType = 2;
             if (userIds.length >= 3) {
                 Api.createRoom(groupName, userIds, roomType).then((state) => {
                     //创建房间   state=成功：1 失败：-1 同名：2
-                    socket.emit("create-group-state", state);
-                    switch (state) {
-                        case 1: {
-                            for (var i = 0; i < userIds.length; i++) {
+                    if (state.re == 1) {
+                        for (var i = 0; i < userIds.length; i++) {
+                            if (listOfUsers[userIds[i]]) {
                                 listOfUsers[userIds[i]].socket.join(groupName);
-                            };
-                            socket.emit('sys', groupName + "创建成功");
-                            break;
-                        }
-                        case 2: {
-                            socket.emit('sys', groupName + "创建失败，重名");
-                            break;
-                        }
+                            }
+                        };
+                    }
+                    if (callback) {
+                        callback(state);
                     }
                 })
-            } else {
-                socket.emit('sys', groupName + "创建失败");
-            }
-
-            if (callback) {
-                callback(true);
             }
         })
 
@@ -411,19 +401,20 @@ module.exports = exports = function (app, socketCallback) {
         //群聊消息 message文本消息，groupId群名，sender发送人，type消息类型,date消息发送时间
         socket.on('send-message-group', function (newMessage, callback) {
             var message = newMessage.content;
-            var room = newMessage.groupName;
-            var roomId = newMessage.groupId;
+            var room = newMessage.receiverName;
+            var roomId = newMessage.receiverId;
             var senderId = newMessage.senderId;
-            var senderName =  newMessage.senderName;
+            var senderName = newMessage.senderName;
             var mType = newMessage.type;
             var sendDate = newMessage.sendDate;
-            var mchatType = 2;  //群聊的chatType 为2
+            var mchatType = newMessage.chatType;  //群聊的chatType 为2
             var data;
             data = {
                 content: message,
                 sender_id: senderId,
-                sender_name:senderName,
+                sender_name: senderName,
                 room_id: roomId,
+                room_name: room,
                 chatType: mchatType,
                 type: mType,
                 send_date: sendDate
@@ -457,7 +448,7 @@ module.exports = exports = function (app, socketCallback) {
                     }
                     console.log(roomId.id);
                     if (leaveUsers != null) {
-                        Api.sendGroupMessage(roomId, senderId,senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
+                        Api.sendGroupMessage(roomId, senderId, senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
                     }
                     if (callback) {
@@ -497,15 +488,13 @@ module.exports = exports = function (app, socketCallback) {
         })
 
         //发送未读消息
-        var sendUnreadMessageInBatch=function(messages,userid){
-            if(messages!=null&&messages.length>0)
-            {
+        var sendUnreadMessageInBatch = function (messages, userid) {
+            if (messages != null && messages.length > 0) {
                 listOfUsers[userid].socket.emit("receive-message-unread", messages);
                 //删除未读信息 
-                for(var i=0;i<messages.length;i++)
-                {
-                    Api.deleteUnreadContent(messages[i].id, userid);
-                }
+                // for (var i = 0; i < messages.length; i++) {
+                //     Api.deleteUnreadContent(messages[i].id, userid);
+                // }
             }
         }
 
@@ -526,9 +515,9 @@ module.exports = exports = function (app, socketCallback) {
             //用户注册时获取所有的未读聊天信息
             Api.fetchMessegeUnread(newUserId).then((messages) => {
 
-                sendUnreadMessageInBatch(messages.data,newUserId)
+                sendUnreadMessageInBatch(messages.data, newUserId)
 
-                return 
+                return
                 console.log(message.data.room_id + "房间id" + message.data.content + "message.sender_id");
                 console.log(message);
                 for (var i = 0; i < message.data.length; i++) {
