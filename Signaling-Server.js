@@ -267,7 +267,7 @@ module.exports = exports = function (app, socketCallback) {
                 sender_name: senderName,
                 type: mType,
                 send_date: sendDate,
-                chatType: mchatType
+                chat_type: mchatType
             }
             Api.createRoomWithoutName(userIds).then((roomId) => {
                 if (listOfUsers[receiverId] != null) {
@@ -408,12 +408,14 @@ module.exports = exports = function (app, socketCallback) {
             var mType = newMessage.type;
             var sendDate = newMessage.sendDate;
             var mchatType = newMessage.chatType;  //群聊的chatType 为2
+            
             var data;
             data = {
                 content: message,
                 sender_id: senderId,
                 sender_name:senderName,
                 room_id: roomId,
+                room_name:room,
                 chat_type: mchatType,
                 type: mType,
                 send_date: sendDate
