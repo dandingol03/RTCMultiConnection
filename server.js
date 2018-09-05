@@ -107,8 +107,8 @@ try {
 } catch (e) { }
 
 
-var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.key')));
-var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/1537956169118.pem')));
+var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
+var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
 var ssl_cabundle = null;
 
 // force auto reboot on failures
