@@ -14,7 +14,7 @@ function myTool() {
 
             var instance = this
             this.connection = new RTCMultiConnection();
-            this.connection.socketURL = '/';
+            this.connection.socketURL ='https://www.jinghonginfotec.com:9001/';
             // this.connection.socketURL = 'https://58.56.100.10:9001/';
             // this.connection.attachStreams = {};
 

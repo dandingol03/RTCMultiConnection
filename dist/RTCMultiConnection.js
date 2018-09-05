@@ -60,7 +60,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
         }
 
         try {
-            connection.socket = io(connection.socketURL + parameters,{‘force new connection’: true});
+            connection.socket = io(connection.socketURL + parameters);
         } catch (e) {
             connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
