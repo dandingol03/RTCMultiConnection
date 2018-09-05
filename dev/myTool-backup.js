@@ -292,6 +292,12 @@ function myTool() {
             var str = y + "-" + m + "-" + d + " " + h + ":" + minute + ":" + second;
             console.log("转换时间格式：" + str);
             return str;
+        },
+        disconnect:function(){
+            this.connection.socket.disconnect()
+        },
+        reconnect:function(){
+            this.connection.socket.reconnect()
         }
 
     }

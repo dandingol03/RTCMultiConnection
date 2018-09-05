@@ -154,8 +154,19 @@ function myTool() {
                 });
                 //接收聊天消息
                 instance.connection.socket.on('receive-message', function (message) {
-                    console.log("======接收到的聊天信息=====");
+                    console.log("======接收到的单聊聊天信息=====");
                     console.log(message);
+                    var data=[{
+                        sender_id:message.sender_id,
+                        content:message.content,
+                        room_id:null,
+                        room_name:null,
+                        send_date:message.send_data,
+                        room_user_ids:message.sender_id,
+                        type:message.type,
+                        chat_type:message.chatType
+                    }]
+                    indexDb.instance.addData(indexDb.instance.myDB.db,indexDb.instance.myDB.ojstore.name,data);
 
                 });
                 //接收未读聊天消息 
@@ -278,9 +289,20 @@ function myTool() {
             instance.connection.socket.emit('join-group', groupId, instance.localUserid)
         },
         //在群里发送文本消息
-        sendMessageGroup: function (message, groupId, sender, type) {
+        sendMessageGroup: function (content, room_id,room_name, sender_id,sender_name) {
             var instance = this;
-            instance.connection.socket.emit('send-message-group', groupId, message, sender, type);
+            var message={
+                content:content,
+                senderId:sender_id,
+                senderName:sender_name,
+                type:'text',
+                chatType:'2',
+                receiverId:room_id,
+                receiverName:room_name,
+                sendDate:new Date().toString(),
+            }
+
+            instance.connection.socket.emit('send-message-group', message);
         },
         //用户创建群
         createGroup: function (groupId, userIds) {
@@ -307,6 +329,9 @@ function myTool() {
             var instance = this;
             instance.connection.socket.emit('get-group-users', groupName);
         },
+        disconnect:function(){
+            this.connection.socket.disconnect()
+        }
     }
 
 }

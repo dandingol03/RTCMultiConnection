@@ -184,7 +184,7 @@ var Api = {
                            
                         }).then(() => {
                             t.commit()
-                            deferred.resolve({ re: 1,data: roomData.id })
+                            deferred.resolve({ re: 1,data:  {room_id:roomData.id,room_name:roomData.name}   })
                         }).catch((e) => {
                             t.rollback()
                             deferred.reject({ re: -1, data: '创建房间失败' })
