@@ -96,19 +96,22 @@ function IndexDB() {
                     console.log(result);
                 };
             },
-            query:function(storename){
+            query:function(storename,callback){
                 var self=this
                 var store = self.myDB.db.transaction(storename,'readwrite').objectStore(storename);
                 var request = store.openCursor();//db为IDBDatabase对象
+                var result=[]
                 request.onerror = function(e){
                 }
                 request.onsuccess = function(e){
                     console.log('游标开始查询')
                     var cursor = e.target.result;
                     if(cursor){//必须要检查
-                        console.log(cursor);
+                        result.push(cursor.value)
                         cursor.continue();//遍历了存储对象中的所有内容
                     }else{
+                        if(callback)
+                            callback(result)
                     }
                 };
             },

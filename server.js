@@ -71,12 +71,14 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     })
 
 
-    Api.fetchMessegeUnread('user_1506589113190').then((roomIds) => {
-        console.log('=======roomIds======')
-        console.log(roomIds)
+    // Api.fetchMessegeUnread('user_1506589113190').then((roomIds) => {
+    //     console.log('=======roomIds======')
+    //     console.log(roomIds)
+    // })
 
-    })
-
+    // Api.createRoomWithoutName(['user_1506589113190','user_150757']).then((res)=>{
+    //     console.log(res)
+    // })
 
 }).catch(function (err) {
     console.log("Server failed to start due to error: %s", err);
@@ -486,7 +488,6 @@ var sendFileMessage = function (file, newMessage) {
         userIds.push(receiverId);
         Api.createRoomWithoutName(userIds).then((roomId) => {
             if (Memory.listOfUsers[receiverId] != null) {
-
                 Memory.listOfUsers[receiverId].socket.emit('receive-message', data)
             } else {
                 Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mChatType, sendDate);
@@ -900,3 +901,5 @@ if (autoRebootServerOnFailure) {
 } else {
     runServer();
 }
+
+

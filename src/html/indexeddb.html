@@ -146,12 +146,15 @@
         // INDEXDB.putData(myDB.db,myDB.ojstore.name,students);
          console.log('*******************获取数据1001*************************');
          //indexDb.instance.getDataByKey(indexDb.instance.myDB.db,indexDb.instance.myDB.ojstore.name,1001);
-        indexDb.instance.query('content')
+        indexDb.instance.query('content',function(records){
+            
+            console.log(records)
+        })
 
         // console.log('******************删除数据1001************');
         // INDEXDB.deleteData(myDB.db,myDB.ojstore.name,1001);
         // console.log('******************删除全部数据************');
-        // INDEXDB.clearData(myDB.db,myDB.ojstore.name);
+        indexDb.instance.clearData(indexDb.instance.myDB.db,indexDb.instance.myDB.ojstore.name);
         // console.log('******************关闭数据库************');
         // INDEXDB.closeDB(myDB.db);
         // console.log('******************删除数据库************');

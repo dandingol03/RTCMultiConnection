@@ -33,7 +33,7 @@
 
 
             window.upload = function () {
-                
+
                 var form = new FormData(document.getElementById("form"));
                 $.ajax({
                     url: 'https://221.214.68.12:9001/file-upload',
@@ -71,6 +71,13 @@
 
             // }, false);
 
+            window.downloadPlugin = function () {
+                var voiceUrl = '/file-download?filePath=' + "file-1535774045286.mp4"
+                var iframe = document.createElement("iframe");
+                document.body.appendChild(iframe);
+                iframe.src = voiceUrl;
+                iframe.style.display = "none";
+            }
 
 
             //2.
@@ -111,6 +118,8 @@
         <button id="open-video-conference">open room to take part in video conference</button>
         <button id="join-video-conference">Join Room to take part in video conference</button>
         <button id="open-or-join-room">set lng lat</button>
+        <button id="disconnect">disconnect</button>
+        <button id="reconnect">reconnect</button>
 
         <br>
         <br>
@@ -225,6 +234,8 @@
             // documnet.getElementById("resetform").reset();
         };
 
+
+
         document.getElementById('login').onclick = function () {
             mytool.localUserid = document.getElementById('user-name').value;
             locallng = document.getElementById('lng').value;
@@ -233,6 +244,14 @@
             localTM = document.getElementById('isTeamMember').value;
             mytool.CLogin(document.getElementById('user-name').value, locallng, locallat, localtype, localTM);
         };
+
+        document.getElementById('disconnect').onclick=function(){
+            mytool.disconnect()
+        }
+
+        document.getElementById('reconnect').onclick=function(){
+            mytool.reconnect()
+        }
 
         //邀请选择用户名加入视频聊天
         document.getElementById('join-room').onclick = function () {
@@ -298,7 +317,6 @@
         };
 
 
-
         document.getElementById('share-file').onclick = function () {
             var fileSelector = new FileSelector();
             fileSelector.selectSingleFile(function (file) {
@@ -314,9 +332,11 @@
         };
         mytool.connection.filesContainer = document.getElementById('file-container');
 
-
-
-
+        window.upKeyFlag=false
+        window.leftKeyFlag=false
+        window.rightKeyFlag=false
+    
+        window.playFlag=true
     </script>
 </body>
 

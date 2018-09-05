@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Interaction Options</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v5.2.0/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+
+  </head>
+  <body>
+    <div tabindex="1" id="map" class="map"></div>
+    <script>
+      import Map from 'ol/Map.js';
+      import View from 'ol/View.js';
+      import {defaults as defaultInteractions} from 'ol/interaction.js';
+      import TileLayer from 'ol/layer/Tile.js';
+      import OSM from 'ol/source/OSM.js';
+
+
+      var map = new Map({
+        interactions: defaultInteractions({
+          constrainResolution: true, onFocusOnly: true
+        }),
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        target: 'map',
+        view: new View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+    </script>
+  </body>
+</html>
