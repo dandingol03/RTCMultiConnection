@@ -256,6 +256,7 @@ module.exports = exports = function (app, socketCallback) {
             var receiverId = newMessage.receiverId;
             var sendDate = newMessage.sendDate;
             var senderName = newMessage.senderName;
+            var receiverName=newMessage.receiverName
 
             userIds.push(senderId);
             userIds.push(receiverId);
@@ -267,7 +268,8 @@ module.exports = exports = function (app, socketCallback) {
                 sender_name: senderName,
                 type: mType,
                 send_date: sendDate,
-                chat_type: mchatType
+                chat_type: mchatType,
+                receiver_name:receiverName
             }
             Api.createRoomWithoutName(userIds).then((roomId) => {
                 if (listOfUsers[receiverId] != null) {
