@@ -22,6 +22,7 @@ Documentation - github.com/muaz-khan/WebRTC-Experiment/tree/master/getMediaEleme
 }
 
 .media-container {
+    
     width: 36%;
     display: inline-block;
     border: 1px solid rgb(0, 0, 0);
@@ -32,8 +33,7 @@ Documentation - github.com/muaz-khan/WebRTC-Experiment/tree/master/getMediaEleme
 }
 
 .media-box {
-    background: black;
-    border: 1px solid rgb(107, 107, 107);
+
     margin: 1px;
 }
 

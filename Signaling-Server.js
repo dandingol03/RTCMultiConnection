@@ -43,7 +43,7 @@ module.exports = exports = function (app, socketCallback) {
                 }
                 tempuserlist.push(temp);
             }
-            
+
             io.emit('return-userlist', 1, tempuserlist);
         }
 
@@ -256,7 +256,7 @@ module.exports = exports = function (app, socketCallback) {
             var receiverId = newMessage.receiverId;
             var sendDate = newMessage.sendDate;
             var senderName = newMessage.senderName;
-            var receiverName=newMessage.receiverName
+            var receiverName = newMessage.receiverName
 
             userIds.push(senderId);
             userIds.push(receiverId);
@@ -269,7 +269,7 @@ module.exports = exports = function (app, socketCallback) {
                 type: mType,
                 send_date: sendDate,
                 chat_type: mchatType,
-                receiver_name:receiverName
+                receiver_name: receiverName
             }
             Api.createRoomWithoutName(userIds).then((roomId) => {
                 if (listOfUsers[receiverId] != null) {
@@ -406,18 +406,18 @@ module.exports = exports = function (app, socketCallback) {
             var room = newMessage.receiverName;
             var roomId = newMessage.receiverId;
             var senderId = newMessage.senderId;
-            var senderName =  newMessage.senderName;
+            var senderName = newMessage.senderName;
             var mType = newMessage.type;
             var sendDate = newMessage.sendDate;
             var mchatType = newMessage.chatType;  //群聊的chatType 为2
-            
+
             var data;
             data = {
                 content: message,
                 sender_id: senderId,
-                sender_name:senderName,
+                sender_name: senderName,
                 room_id: roomId,
-                room_name:room,
+                room_name: room,
                 chat_type: mchatType,
                 type: mType,
                 send_date: sendDate
@@ -451,7 +451,7 @@ module.exports = exports = function (app, socketCallback) {
                     }
                     console.log(roomId.id);
                     if (leaveUsers != null) {
-                        Api.sendGroupMessage(roomId, senderId,senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
+                        Api.sendGroupMessage(roomId, senderId, senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
                     }
                     if (callback) {
@@ -491,39 +491,25 @@ module.exports = exports = function (app, socketCallback) {
         })
 
         //发送未读消息
-        var sendUnreadMessageInBatch=function(messages,userid){
-            if(messages!=null&&messages.length>0)
-            {
-                listOfUsers[userid].socket.emit("receive-message-unread", messages);
+        var sendUnreadMessageInBatch = function (messages, userid) {
+            listOfUsers[userid].socket.emit("receive-message-unread", messages);
+            if (messages != null && messages.length > 0) {
                 //删除未读信息 
-                return 
-                for(var i=0;i<messages.length;i++)
-                {
+                return
+                for (var i = 0; i < messages.length; i++) {
                     Api.deleteUnreadContent(messages[i].id, userid);
                 }
             }
         }
 
-        //接受客户端用户更新信息  edit by wqz
-        socket.on('changed-uuid', function (newUserId, isTeamMember, callback) {
-
-            console.log("==========================" + newUserId + isTeamMember + _.keys(listOfUsers));
-            callback = callback || function () { };
-            //用户登录时初始化群聊分组信息  by wqz 
-            Api.getGroupChatRooms(newUserId).then((roomIds) => {
-                console.log(listOfUsers[newUserId]);
-                for (var i = 0; i < roomIds.data.length; i++) {
-                    listOfUsers[newUserId].socket.join(roomIds.data[i].name);
-                    socket.join(roomIds.data[i].name);
-                }
-                console.log(listOfUsers[newUserId].socket.rooms);
-            })
+        //读取本用户的未读信息
+        socket.on('get-unread-message', function (newUserId) {
             //用户注册时获取所有的未读聊天信息
             Api.fetchMessegeUnread(newUserId).then((messages) => {
 
-                sendUnreadMessageInBatch(messages.data,newUserId)
+                sendUnreadMessageInBatch(messages.data, newUserId)
 
-                return 
+                return
                 console.log(message.data.room_id + "房间id" + message.data.content + "message.sender_id");
                 console.log(message);
                 for (var i = 0; i < message.data.length; i++) {
@@ -555,8 +541,22 @@ module.exports = exports = function (app, socketCallback) {
 
 
             })
+        })
 
+        //接受客户端用户更新信息  edit by wqz
+        socket.on('changed-uuid', function (newUserId, isTeamMember, callback) {
 
+            console.log("==========================" + newUserId + isTeamMember + _.keys(listOfUsers));
+            callback = callback || function () { };
+            //用户登录时初始化群聊分组信息  by wqz 
+            Api.getGroupChatRooms(newUserId).then((roomIds) => {
+                console.log(listOfUsers[newUserId]);
+                for (var i = 0; i < roomIds.data.length; i++) {
+                    listOfUsers[newUserId].socket.join(roomIds.data[i].name);
+                    socket.join(roomIds.data[i].name);
+                }
+                console.log(listOfUsers[newUserId].socket.rooms);
+            })
 
             //********************************/
             if (params.dontUpdateUserId) {
