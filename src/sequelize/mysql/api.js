@@ -248,7 +248,7 @@ var Api = {
             var arr = []
             for (var i = 0; i < statics.length; i++) {
                 var record = statics[i].get({ plain: true })
-                if (record.userCount > 2) {
+                if (record.userCount >=2) {
                     arr.push(record)
                 }
             }
