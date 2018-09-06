@@ -60,7 +60,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
         }
 
         try {
-            connection.socket = io(connection.socketURL + parameters);
+            connection.socket = io(connection.socketURL + parameters,{'force new connection':true});
         } catch (e) {
             connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
@@ -327,6 +327,8 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             if (connection.enableLogs) {
                 console.warn('socket.io connection is closed');
             }
+            //todo:设置重连任务
+            //connection.socket.connect()
         });
 
         connection.socket.on('join-with-password', function (remoteUserId) {
