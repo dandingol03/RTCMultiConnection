@@ -37,6 +37,8 @@ function IndexDB() {
                                 keyPath:self.myDB.ojstore.keypath,
                                 autoIncrement: true
                             });
+                            var index=store.createIndex('urgency','urgency',{unique:false})
+                            index=store.createIndex('room_id','room_id',{unique:false})
                         console.log('成功建立对象存储空间：'+self.myDB.ojstore.name);
                     }else{
                         
@@ -112,6 +114,60 @@ function IndexDB() {
                     }else{
                         if(callback)
                             callback(result)
+                    }
+                };
+            },
+            queryByField:function(storename,indexName,keyRange,callback){
+                var self=this
+                var store = self.myDB.db.transaction(storename,'readwrite').objectStore(storename);
+                var request = store.index(indexName).openCursor(keyRange);//db为IDBDatabase对象
+                var result=[]
+                request.onerror = function(e){
+                }
+                request.onsuccess = function(e){
+                    console.log('游标开始查询')
+                    var cursor = e.target.result;
+                    if(cursor){//必须要检查
+                        result.push(cursor.value)
+                        cursor.continue();//遍历了存储对象中的所有内容
+                    }else{
+                        if(callback)
+                            callback(result)
+                    }
+                };
+            },
+            //根据id更新urgency属性
+            updateDataById:function(storename,id,urgency){
+                var self=this
+                var store = self.myDB.db.transaction(storename,'readwrite').objectStore(storename);
+                var request = store.get(id);
+                request.onsuccess = function (e) {
+                    var entity = e.target.result;
+                    entity.urgency = urgency;
+                    store.put(entity);
+                }
+            },
+            //根据字段更新urgency属性
+            updateDataByField:function(storename,field,keyRange,urgency,callback)
+            {
+                var self=this
+                var store = self.myDB.db.transaction(storename,'readwrite').objectStore(storename);
+                var request = store.index(field).openCursor(keyRange);//db为IDBDatabase对象
+                var affected=0
+                request.onerror = function(e){
+                }
+                request.onsuccess = function(e){
+                    console.log('游标开始查询')
+                    var cursor = e.target.result;
+                    if(cursor){//必须要检查
+                        var entity=cursor.value
+                        entity.urgency=urgency
+                        store.put(entity)
+                        affected++
+                        cursor.continue();//遍历了存储对象中的所有内容
+                    }else{
+                        if(callback)
+                            callback(affected)
                     }
                 };
             },

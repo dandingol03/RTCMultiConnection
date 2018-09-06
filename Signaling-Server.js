@@ -496,6 +496,7 @@ module.exports = exports = function (app, socketCallback) {
             {
                 listOfUsers[userid].socket.emit("receive-message-unread", messages);
                 //删除未读信息 
+                return 
                 for(var i=0;i<messages.length;i++)
                 {
                     Api.deleteUnreadContent(messages[i].id, userid);
