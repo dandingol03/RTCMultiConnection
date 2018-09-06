@@ -170,9 +170,6 @@ var Api = {
     createRoom: (name, userIds, type) => {
         var deferred = Q.defer()
         var roomData = {};
-        Api.getRoomInfo(name).then((room) => {
-
-            if (room == null) {
                 //开启事务
                 mysql.sequelize.transaction().then((t) => {
                     //创建群聊房间时 remark为2 edit by wqz
@@ -190,12 +187,6 @@ var Api = {
                             deferred.reject({ re: -1, data: '创建房间失败' })
                         })
                 })
-
-            } else {
-                deferred.resolve({ re: 2, data: '已有相同房间名' })
-            }
-        })
-
         return deferred.promise
     },
     //用户离开房间,仅供群聊房间
