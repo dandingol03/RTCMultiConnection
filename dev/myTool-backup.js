@@ -36,7 +36,6 @@ function myTool() {
             //流的监听事件
             this.connection.onstream = function (event) {
                
-                console.log(event);
                 var existing = document.getElementById(event.streamid);
                 if (existing && existing.parentNode) {
                     existing.parentNode.removeChild(existing);
@@ -75,11 +74,19 @@ function myTool() {
                     width: width,
                     showOnMouseEnter: false
                 });
+               
 
                 instance.connection.videosContainer.appendChild(mediaElement);
 
                 setTimeout(function () {
                     video.play();
+                    console.log(mediaElement);
+                    var div = document.createElement('div');
+                    div.id = event.streamid || event.stream.id;
+                    
+                    div.appendChild(event.mediaElement);
+                       
+                    console.log(div)
                 }, 5000);
             };
 
@@ -244,7 +251,9 @@ function myTool() {
         //用户创建群
         createGroup: function (groupId, userIds) {
             var instance = this;
-            instance.connection.socket.emit('create-group', groupId, instance.localUserid, userIds);
+            instance.connection.socket.emit('create-group', groupId, instance.localUserid, userIds,function(data){
+                console.log(data);
+            });
         },
         //用户退出群
         leaveGroup: function (groupId) {
