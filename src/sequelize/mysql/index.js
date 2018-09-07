@@ -12,6 +12,6 @@ db.RoomInfo = db.sequelize.import('./model/mobile-chat-room-info.js')
 db.RelationShip=db.sequelize.import('./model/mobile_chat_relationship.js')
 db.Content=db.sequelize.import('./model/mobile_chat_content.js')
 db.User=db.sequelize.import('./model//pub_users.js')
-
+db.trackInfo=db.sequelize.import('./model//patrol_track_info.js')
 
 module.exports = db

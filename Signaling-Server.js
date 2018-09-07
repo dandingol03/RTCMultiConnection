@@ -585,11 +585,36 @@ module.exports = exports = function (app, socketCallback) {
                 pushLogs('changed-uuid', e);
             }
         });
+        //创建新轨迹
+        socket.on('start-track', function (data,callback) {
+            var Id = "trac_" + data.userId + data.startTime;
+            var track = JSON.stringify(data.track);
+            var userId = data.userId;
+            var startTime = data.startTime;
+            Api.createTrack(Id, userId, track, startTime).then((mTrack)=>{
+              console.log(mTrack);
+              if(callback){
+                  callback(mTrack);
+              }
+            })
+        })
+
+        //结束新轨迹
+        socket.on("end-track", function (data) {
+            Api.endTrack(data.trackId, data.endTime)
+        })
 
         //接受用户设置经纬度的消息  edit by wqz
         socket.on('set-lng-lat', function (mData) {
             var data = JSON.parse(mData);
             try {
+                if (data.trackId) {
+                    Api.searchTrack(data.trackId).then((track) => {
+                        var tTrack = JSON.parse(track.track);
+                        tTrack.push([data.lng, data.lat]);
+                        Api.updateTrack(track.id, JSON.stringify(tTrack))
+                    })
+                }
                 if (listOfUsers[data.userId]) {
                     listOfUsers[socket.userid].lat = data.lat;
                     listOfUsers[socket.userid].lng = data.lng;
