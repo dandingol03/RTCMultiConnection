@@ -586,8 +586,9 @@ module.exports = exports = function (app, socketCallback) {
             }
         });
         //创建新轨迹
-        socket.on('start-track', function (data,callback) {
-            console.log(data);
+        socket.on('start-track', function (mData,callback) {
+            console.log(mData);
+            var data = JSON.parse(mData);
             console.log("============="+data.userId + data.startTime);
             var Id = "trac_" + data.userId + data.startTime;
             var track = JSON.stringify(data.track);
