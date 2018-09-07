@@ -24,14 +24,14 @@ var Api = {
         return mysql.RelationShip.bulkCreate(creates, { transaction: t })
     },
     //插入消息记录
-    insertContent: (room_id, sender_id,sender_name, content, userIds, type,chat_type,send_date, t) => {
+    insertContent: (room_id, sender_id, sender_name, content, userIds, type, chat_type, send_date, t) => {
         var room_user_ids = ''
         for (var i = 0; i < userIds.length; i++) {
             room_user_ids += userIds[i]
             if (i != userIds.length - 1)
                 room_user_ids += ','
         }
-        return mysql.Content.create({ room_id, sender_id,sender_name, content, type, room_user_ids,chat_type, send_date }, { transaction: t })
+        return mysql.Content.create({ room_id, sender_id, sender_name, content, type, room_user_ids, chat_type, send_date }, { transaction: t })
     },
     //删除关系记录
     deleteRelation: (room_id, userIds, t) => {
@@ -170,23 +170,23 @@ var Api = {
     createRoom: (name, userIds, type) => {
         var deferred = Q.defer()
         var roomData = {};
-                //开启事务
-                mysql.sequelize.transaction().then((t) => {
-                    //创建群聊房间时 remark为2 edit by wqz
-                    mysql.RoomInfo.create({ name: name, create_date: Api.getTaskTime(new Date().toString()), remark: "2" }, { transaction: t })
-                        .then((room) => {
-                            //加入关系时  关系表中群聊type=2
-                            roomData = room;
-                            return Api.insertRelation(room.id, userIds, "2", t)
-                           
-                        }).then(() => {
-                            t.commit()
-                            deferred.resolve({ re: 1,data:  {room_id:roomData.id,room_name:roomData.name}   })
-                        }).catch((e) => {
-                            t.rollback()
-                            deferred.reject({ re: -1, data: '创建房间失败' })
-                        })
+        //开启事务
+        mysql.sequelize.transaction().then((t) => {
+            //创建群聊房间时 remark为2 edit by wqz
+            mysql.RoomInfo.create({ name: name, create_date: Api.getTaskTime(new Date().toString()), remark: "2" }, { transaction: t })
+                .then((room) => {
+                    //加入关系时  关系表中群聊type=2
+                    roomData = room;
+                    return Api.insertRelation(room.id, userIds, "2", t)
+
+                }).then(() => {
+                    t.commit()
+                    deferred.resolve({ re: 1, data: { room_id: roomData.id, room_name: roomData.name } })
+                }).catch((e) => {
+                    t.rollback()
+                    deferred.reject({ re: -1, data: '创建房间失败' })
                 })
+        })
         return deferred.promise
     },
     //用户离开房间,仅供群聊房间
@@ -248,7 +248,7 @@ var Api = {
             var arr = []
             for (var i = 0; i < statics.length; i++) {
                 var record = statics[i].get({ plain: true })
-                if (record.userCount >=2) {
+                if (record.userCount >= 2) {
                     arr.push(record)
                 }
             }
@@ -279,13 +279,12 @@ var Api = {
                     for (var j = 0; j < matched.length; j++) {
                         promises.push(getRoomPromise(matched[j]))
                     }
-                    
-                    Q.all(promises).then((rooms)=>{
-                        var matchedRooms=[]
-                        for(var k=0;k<rooms.length;k++)
-                        {
-                            if(rooms[k]!=null)
-                                matchedRooms.push(rooms[k].get({plain:true}))
+
+                    Q.all(promises).then((rooms) => {
+                        var matchedRooms = []
+                        for (var k = 0; k < rooms.length; k++) {
+                            if (rooms[k] != null)
+                                matchedRooms.push(rooms[k].get({ plain: true }))
                         }
                         deferred.resolve({ re: 1, data: matchedRooms })
                     }).catch((e) => {
@@ -333,10 +332,10 @@ var Api = {
         return deferred.promise
     },
     //发送组消息和发送一对一消息都用此接口
-    sendGroupMessage: (room_id, sender_id,sender_name, content, userIds, type,chatType,date) => {
+    sendGroupMessage: (room_id, sender_id, sender_name, content, userIds, type, chatType, date) => {
         var deferred = Q.defer()
         mysql.sequelize.transaction().then((t) => {
-            Api.insertContent(room_id, sender_id, sender_name,content, userIds, type,chatType,date, t).then((res) => {
+            Api.insertContent(room_id, sender_id, sender_name, content, userIds, type, chatType, date, t).then((res) => {
                 deferred.resolve({ re: 1 })
                 t.commit()
             }).catch((e) => {
@@ -396,7 +395,7 @@ var Api = {
             }
 
             for (var j = 0; j < contents.length; j++) {
-                promises.push(getRoomPromise(contents[j].get({plain:true})))
+                promises.push(getRoomPromise(contents[j].get({ plain: true })))
             }
             Q.all(promises).then((result) => {
 
@@ -441,11 +440,55 @@ var Api = {
             deferred.resolve({ re: 1, data: user })
         })
         return deferred.promise
+    },
+    //创建轨迹信息
+    createTrack: (mId, userId, mTrack, startTime, t) => {
+        var deferred = Q.defer()
+        mysql.trackInfo.create({ id: mId, user_id: userId, track: mTrack, start_time: startTime }).then((content) => {
+            if (content != null) { 
+                deferred.resolve({ re: 1, id: content.id })
+             }
+             //-1创建失败
+            else { deferred.resolve({ re: -1 }) }
+        })
+        return deferred.promise
+    },
+    //结束轨迹信息
+    endTrack: (mId, mEndTime) => {
+        mysql.trackInfo.update({
+            end_time: mEndTime,
+        }, {
+                where: {
+                    id: mId
+                }
+            });
+    },
+    //更新轨迹信息
+    updateTrack: (mId, mTrack) => {
+        mysql.trackInfo.update({
+            track: mTrack,
+        }, {
+                where: {
+                    id: mId
+                }
+            });
+    },
+    //获取轨迹信息
+    searchTrack: (trackId) => {
+        var defer = Q.defer()
+        mysql.sequelize.transaction().then((t) => {
+            mysql.trackInfo.find({ where: { id: trackId } }).then((track) => {
+                defer.resolve(track);
+
+            })
+        })
+        try {
+            return defer.promise
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
-
-
-
 
 
 module.exports = Api
