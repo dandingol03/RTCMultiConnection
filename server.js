@@ -480,7 +480,7 @@ var sendFileMessage = function (file, newMessage) {
             sender_name: senderName,
             type: mType,
             send_date: sendDate,
-            chatType: mChatType
+            chat_type: mChatType
         }
         //messageType为1时，为单人聊天
         var userIds = [];
@@ -503,7 +503,7 @@ var sendFileMessage = function (file, newMessage) {
             sender_name: senderName,
             room_id: receiverId,
             room_name: receiverName,
-            chatType: mChatType,
+            chat_type: mChatType,
             type: mType,
             send_date: sendDate
         }
