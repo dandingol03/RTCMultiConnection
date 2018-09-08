@@ -240,11 +240,26 @@ module.exports = exports = function (app, socketCallback) {
         })
 
 
+        /**
+         * 查询发创建房间
+         */
+        socket.on('create-room',function(userid,userIds,callback){
+            Api.createRoomWithoutName(userIds).then((res) => {
+                if (listOfUsers[userid] != null) {
+                    listOfUsers[userid].socket.emit('on-create-room', res.data)
+                } else {
+                }
+
+                if (callback) {
+                    callback(res.data);
+                }
+            })
+        })
+        
+
         /*
         * 单人聊天接口
         */
-
-
         //单聊接口
         //接收文本消息 edit by wqz
         socket.on('send-message-person', function (newMessage, callback) {
@@ -257,6 +272,9 @@ module.exports = exports = function (app, socketCallback) {
             var sendDate = newMessage.sendDate;
             var senderName = newMessage.senderName;
             var receiverName = newMessage.receiverName
+            var roomId=newMessage.room_id
+            if(roomId!==undefined&&roomId!==null)
+                roomId=parseInt(roomId)
 
             userIds.push(senderId);
             userIds.push(receiverId);
@@ -269,13 +287,14 @@ module.exports = exports = function (app, socketCallback) {
                 type: mType,
                 send_date: sendDate,
                 chat_type: mchatType,
-                receiver_name: receiverName
+                receiver_name: receiverName,
+                room_id:roomId
             }
-            Api.createRoomWithoutName(userIds).then((roomId) => {
+            Api.createRoomWithoutName(userIds).then((ins) => {
                 if (listOfUsers[receiverId] != null) {
                     listOfUsers[receiverId].socket.emit('receive-message', data)
                 } else {
-                    Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mchatType, sendDate);
+                    Api.sendGroupMessage(ins.data.id, senderId, senderName, message, [receiverId], mType, mchatType, sendDate);
                 }
 
                 if (callback) {
@@ -492,14 +511,19 @@ module.exports = exports = function (app, socketCallback) {
 
         //发送未读消息
         var sendUnreadMessageInBatch = function (messages, userid) {
-            listOfUsers[userid].socket.emit("receive-message-unread", messages);
-            if (messages != null && messages.length > 0) {
-                //删除未读信息 
-                return
-                for (var i = 0; i < messages.length; i++) {
-                    Api.deleteUnreadContent(messages[i].id, userid);
+
+            if(listOfUsers[userid].socket!=undefined&&listOfUsers[userid].socket!=null)
+            {
+                listOfUsers[userid].socket.emit("receive-message-unread", messages);
+                if (messages != null && messages.length > 0) {
+                    for (var i = 0; i < messages.length; i++) {
+                        Api.deleteUnreadContent(messages[i].id, userid);
+                    }
                 }
+            }else{
+                return 
             }
+           
         }
 
         //读取本用户的未读信息
@@ -538,8 +562,16 @@ module.exports = exports = function (app, socketCallback) {
                         listOfUsers[newUserId].socket.emit("receive-message", data);
                     }
                 }
+            })
+        })
 
-
+        socket.on('rejoin',function(userid,callback){
+            Api.getGroupChatRooms(userid).then((roomIds) => {
+                
+                for (var i = 0; i < roomIds.data.length; i++) {
+                    socket.join(roomIds.data[i].name);
+                }
+                callback({re:1})
             })
         })
 
@@ -550,12 +582,10 @@ module.exports = exports = function (app, socketCallback) {
             callback = callback || function () { };
             //用户登录时初始化群聊分组信息  by wqz 
             Api.getGroupChatRooms(newUserId).then((roomIds) => {
-                console.log(listOfUsers[newUserId]);
                 for (var i = 0; i < roomIds.data.length; i++) {
                     listOfUsers[newUserId].socket.join(roomIds.data[i].name);
                     socket.join(roomIds.data[i].name);
                 }
-                console.log(listOfUsers[newUserId].socket.rooms);
             })
 
             //********************************/
@@ -567,6 +597,7 @@ module.exports = exports = function (app, socketCallback) {
                 if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.userid == socket.userid) {
                     if (newUserId === socket.userid) {
                         listOfUsers[newUserId].isTeamMember = isTeamMember;
+                        callback()
                         return;
                     }
                     var oldUserId = socket.userid;

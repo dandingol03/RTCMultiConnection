@@ -76,7 +76,11 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             console.log("join-our-room" + roomid + "");
         });
 
-       
+        connection.socket.on('reconnect',function(){
+            connection.socket.emit('rejoin',myTool.localUserid,function(){
+                cosnole.log('rejoin all groups done!')
+            }) 
+        })
 
 
 
@@ -306,6 +310,13 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
 
         connection.socket.on('connect', function () {
             if (alreadyConnected) {
+                if(myTool.localUserId!=undefined&&myTool.localUserId!=null)
+                {
+                    connection.socket.emit('rejoin',myTool.localUserId,function(){
+                        cosnole.log('rejoin all groups done!')
+                    }) 
+                }
+
                 return;
             }
             alreadyConnected = true;
@@ -328,7 +339,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
                 console.warn('socket.io connection is closed');
             }
             //todo:设置重连任务
-            //connection.socket.connect()
+            connection.socket.connect()
         });
 
         connection.socket.on('join-with-password', function (remoteUserId) {

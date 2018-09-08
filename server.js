@@ -25,7 +25,7 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     }
     // })
 
-    // Api.getGroupChatRooms('dym').then(()=>{
+    // Api.getGroupChatRooms('user_1506589085874').then((res)=>{
     //     console.log()
     // })
 
@@ -211,6 +211,12 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
     else
         filename = filePath
 
+
+            
+    var base64Encode=false
+    if(request.query.base64Encode!==undefined&&request.query.base64Encode!==null)
+        base64Encode=true    
+
     var suffix=null
     var mimeType='application/force-download'
     if(filename.indexOf('.')!=-1)
@@ -243,6 +249,19 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
             response.end("png doesn't exist ")
             return
         }
+
+        if(base64Encode)
+        {
+            var imageBuf = fs.readFileSync(wholePath);
+            response.writeHead(200, {
+            
+                'Content-Type': mimeType,
+                'Content-Disposition': 'attachment;filename=' + filename
+            });
+            response.end(imageBuf.toString("base64"))
+            return
+        }
+
         //读取文件大小
         fs.stat(wholePath, (err, stats) => {
             if (err) {
@@ -290,6 +309,9 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
             })
             return
         }
+
+
+
         //读取文件大小
         fs.stat(wholePath, (err, stats) => {
             if (err) {
@@ -460,7 +482,7 @@ expressRoute.get('/*', function (request, response) {
 })
 
 
-//todo:发送文件消息的业务逻辑,由wqz完成 
+
 var sendFileMessage = function (file, newMessage) {
     var room = newMessage.groupName;
     var senderId = newMessage.senderId;
@@ -471,7 +493,7 @@ var sendFileMessage = function (file, newMessage) {
     var mChatType = newMessage.chatType;
     var sendDate = newMessage.sendDate;
     var message = file
-    if (mChatType == 1) {
+    if ((mChatType+'')== '1') {
         //单聊
         var data = {};
         data = {
@@ -493,7 +515,7 @@ var sendFileMessage = function (file, newMessage) {
                 Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mChatType, sendDate);
             }
         });
-    } else if (mChatType == 2) {
+    } else if ((''+mChatType) == '2') {
         //多人聊天
         //messageType为2时，为群聊
         var data = {};
@@ -596,6 +618,7 @@ expressRoute.post('/file-download', urlencodedParser, function (request, respons
             })
             return
         }
+        
         //读取文件大小
         fs.stat(wholePath, (err, stats) => {
             if (err) {
