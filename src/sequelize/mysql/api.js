@@ -445,10 +445,10 @@ var Api = {
     createTrack: (mId, userId, mTrack, startTime, t) => {
         var deferred = Q.defer()
         mysql.trackInfo.create({ id: mId, user_id: userId, track: mTrack, start_time: startTime }).then((content) => {
-            if (content != null) { 
+            if (content != null) {
                 deferred.resolve({ re: 1, id: content.id })  //id为轨迹id
-             }
-             //-1创建失败
+            }
+            //-1创建失败
             else { deferred.resolve({ re: -1 }) }
         })
         return deferred.promise
@@ -477,12 +477,17 @@ var Api = {
     //根据trackId获取轨迹信息
     searchTrack: (trackId) => {
         var defer = Q.defer()
+        mysql.sequelize.transaction().then((t) => {
             mysql.trackInfo.find({ where: { id: trackId } }).then((track) => {
-                defer.resolve(track);
+                t.commit()
+                defer.resolve({re:1,data:track});
+
+            }).catch((e) => {
+                t.rollback()
+                defer.reject({ re: -1, data: e })
             })
-    
-            return defer.promise
-       
+        })
+        return defer.promise
     }
 }
 
