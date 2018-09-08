@@ -14,7 +14,8 @@ function myTool() {
 
             var instance = this
             this.connection = new RTCMultiConnection();
-            this.connection.socketURL ='https://www.jinghonginfotec.com:9001/';
+            this.connection.socketURL = '/';
+            // this.connection.socketURL ='https://www.jinghonginfotec.com:9001/';
             // this.connection.socketURL = 'https://58.56.100.10:9001/';
             // this.connection.attachStreams = {};
 
@@ -34,7 +35,7 @@ function myTool() {
             this.connection.videosContainer = document.getElementById('videos-container');
             //流的监听事件
             this.connection.onstream = function (event) {
-
+               
                 var existing = document.getElementById(event.streamid);
                 if (existing && existing.parentNode) {
                     existing.parentNode.removeChild(existing);
@@ -73,11 +74,19 @@ function myTool() {
                     width: width,
                     showOnMouseEnter: false
                 });
+               
 
                 instance.connection.videosContainer.appendChild(mediaElement);
 
                 setTimeout(function () {
                     video.play();
+                    console.log(mediaElement);
+                    var div = document.createElement('div');
+                    div.id = event.streamid || event.stream.id;
+                    
+                    div.appendChild(event.mediaElement);
+                       
+                    console.log(div)
                 }, 5000);
             };
 
@@ -242,7 +251,9 @@ function myTool() {
         //用户创建群
         createGroup: function (groupId, userIds) {
             var instance = this;
-            instance.connection.socket.emit('create-group', groupId, instance.localUserid, userIds);
+            instance.connection.socket.emit('create-group', groupId, instance.localUserid, userIds,function(data){
+                console.log(data);
+            });
         },
         //用户退出群
         leaveGroup: function (groupId) {
@@ -298,8 +309,41 @@ function myTool() {
         },
         reconnect:function(){
             this.connection.socket.reconnect()
+        },
+        //创建新巡线轨迹
+        startLocation:function(mUserId,mTrack){
+            var data={
+               track: mTrack,
+               userId: mUserId,
+               startTime: mytool.getTaskTime(new Date().toString())
+            }
+            var instance = this;
+            instance.connection.socket.emit('start-track', data,function(trackId){
+                     console.log (trackId);
+            });
+        },
+        //结束轨迹巡航
+        endLocation:function(mUserId,mTrack){
+            var data={
+               track: mTrack,
+               userId: mUserId,
+               endTime: mytool.getTaskTime(new Date().toString())
+            }
+            var instance = this;
+            instance.connection.socket.emit('end-track', data);
+        },
+        //发送实时位置  end-track
+        emitLocation:function(mTrack,mLng,mLat,mTrackId){
+            var data={
+               trackId: mTrack,
+               lng: mLng,
+               lat: mLat,
+               trackId:mTrackId
+            }
+            var track = JSON.stringify(data);
+            var instance = this;
+            instance.connection.socket.emit('set-lng-lat', track);
         }
-
     }
 
 }

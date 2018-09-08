@@ -261,6 +261,7 @@ var Api = {
                 }else{
                     deferred.resolve({re:1,data:statics})
                 }
+
             })
         return deferred.promise
     },
@@ -403,11 +404,56 @@ var Api = {
             deferred.resolve({ re: 1, data: user })
         })
         return deferred.promise
+    },
+    //创建轨迹信息
+    createTrack: (mId, userId, mTrack, startTime, t) => {
+        var deferred = Q.defer()
+        mysql.trackInfo.create({ id: mId, user_id: userId, track: mTrack, start_time: startTime }).then((content) => {
+            if (content != null) {
+                deferred.resolve({ re: 1, id: content.id })  //id为轨迹id
+            }
+            //-1创建失败
+            else { deferred.resolve({ re: -1 }) }
+        })
+        return deferred.promise
+    },
+    //结束轨迹信息
+    endTrack: (mId, mEndTime) => {
+        mysql.trackInfo.update({
+            end_time: mEndTime,
+        }, {
+                where: {
+                    //id为轨迹id
+                    id: mId
+                }
+            });
+    },
+    //更新轨迹信息
+    updateTrack: (mId, mTrack) => {
+        mysql.trackInfo.update({
+            track: mTrack,
+        }, {
+                where: {
+                    id: mId
+                }
+            });
+    },
+    //根据trackId获取轨迹信息
+    searchTrack: (trackId) => {
+        var defer = Q.defer()
+        mysql.sequelize.transaction().then((t) => {
+            mysql.trackInfo.find({ where: { id: trackId } }).then((track) => {
+                t.commit()
+                defer.resolve({re:1,data:track});
+
+            }).catch((e) => {
+                t.rollback()
+                defer.reject({ re: -1, data: e })
+            })
+        })
+        return defer.promise
     }
 }
-
-
-
 
 
 module.exports = Api
