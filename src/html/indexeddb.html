@@ -20,9 +20,23 @@
         <input type="file" name="file" />
     </form>
 
+    <input type="file" name="file" id="image" onchange="onIamgeSelect()"/>
+
     <div style="width: 260px;height: 200px;background-color: antiquewhite"></div>
 
     <script>
+
+        function onIamgeSelect(){
+            var reader = new FileReader();
+            var file=$('#image')[0].files[0]
+            reader.onload = function (e) {
+                var base64Img = e.target.result;
+                var image=new Image()
+                image.src=base64Img
+                document.body.append(image)
+            }
+            reader.readAsDataURL(file);
+        }
 
         // var myDB={
         //     name:'univisity',

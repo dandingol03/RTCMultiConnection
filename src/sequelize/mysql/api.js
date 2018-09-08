@@ -234,71 +234,35 @@ var Api = {
     getRooms: () => {
         return mysql.RoomInfo.findAll()
     },
+    //试验性查询
+    mysqlGetRooms: (user_id) => {
+        var deferred = Q.defer()
+        var t1 = Date.now()
+        mysql.sequelize.query('select distinct room_id  from mobile_chat_relationship where user_id=?',
+            { replacements: [user_id], type: mysql.sequelize.QueryTypes.SELECT }).then((res) => {
+                var t2 = Date.now()
+                console.log('interval -> ' + t2 - t1)
+                deferred.resolve({ re: 1, data: res })
+            })
+        return deferred.promise
+    },
     //获取所有群聊房间
     getGroupChatRooms: (user_id) => {
         var deferred = Q.defer()
+        
+        mysql.sequelize.query('select id,name,remark from mobile_chat_room_info where id '+
+                                    'in (select distinct room_id  from mobile_chat_relationship where user_id=?)',
+            { replacements: [user_id], type: mysql.sequelize.QueryTypes.SELECT })
+            .then((statics) => {
 
-        mysql.RelationShip.findAll({
-            attributes: [
-                [Sequelize.fn('COUNT', '*'), 'userCount'],
-                'room_id'
-            ],
-            group: ['room_id']
-        }).then((statics) => {
-            var arr = []
-            for (var i = 0; i < statics.length; i++) {
-                var record = statics[i].get({ plain: true })
-                if (record.userCount >= 2) {
-                    arr.push(record)
-                }
-            }
-
-            //todo:查询是否含有user_id
-            let promises = []
-            function getPromise(room_id) {
-                return mysql.RelationShip.find({ where: { room_id: room_id, user_id: user_id } })
-            }
-            function getRoomPromise(room_id) {
-                return mysql.RoomInfo.find({ where: { id: room_id } })
-            }
-
-
-            for (var i = 0; i < arr.length; i++) {
-                promises.push(getPromise(arr[i].room_id))
-            }
-            var matched = []
-            Q.all(promises).then((result) => {
-                for (var i = 0; i < result.length; i++) {
-                    var res = result[i]
-                    if (res != null) {
-                        matched.push(res.room_id)
-                    }
-                }
-                if (matched.length > 0) {
-                    promises = []
-                    for (var j = 0; j < matched.length; j++) {
-                        promises.push(getRoomPromise(matched[j]))
-                    }
-
-                    Q.all(promises).then((rooms) => {
-                        var matchedRooms = []
-                        for (var k = 0; k < rooms.length; k++) {
-                            if (rooms[k] != null)
-                                matchedRooms.push(rooms[k].get({ plain: true }))
-                        }
-                        deferred.resolve({ re: 1, data: matchedRooms })
-                    }).catch((e) => {
-                        console.error(e)
-                        deferred.reject({ re: -1, data: null })
-                    })
-                } else {
-                    deferred.resolve({ re: 2, data: null })
+                var matched = statics
+                if (statics.length == 0) {
+                    deferred.resolve({ re: 1, data: [] })
+                }else{
+                    deferred.resolve({re:1,data:statics})
                 }
 
             })
-        })
-
-
         return deferred.promise
     },
     //获取房间成员
