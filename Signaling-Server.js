@@ -586,19 +586,19 @@ module.exports = exports = function (app, socketCallback) {
             }
         });
         //创建新轨迹
-        socket.on('start-track', function (mData,callback) {
+        socket.on('start-track', function (mData, callback) {
             console.log(mData);
             var data = JSON.parse(mData);
-            console.log("============="+data.userId + data.startTime);
+            console.log("=============" + data.userId + data.startTime);
             var Id = "trac_" + data.userId + data.startTime;
             var track = JSON.stringify(data.track);
             var userId = data.userId;
             var startTime = data.startTime;
-            Api.createTrack(Id, userId, track, startTime).then((mTrack)=>{
-              console.log(mTrack);
-              if(callback){
-                  callback(mTrack);
-              }
+            Api.createTrack(Id, userId, track, startTime).then((mTrack) => {
+                console.log(mTrack);
+                if (callback) {
+                    callback(mTrack);
+                }
             })
         })
 
@@ -613,12 +613,14 @@ module.exports = exports = function (app, socketCallback) {
             try {
                 if (data.trackId) {
                     Api.searchTrack(data.trackId).then((track) => {
-                        var tTrack = JSON.parse(track.track);
-                        tTrack.push([data.lng, data.lat]);
-                        console.log("=============");
-                        console.log(tTrack);
-                        console.log(data);
-                        Api.updateTrack(track.id, JSON.stringify(tTrack))
+                        if (track.re == 1) {
+                            var tTrack = [];
+                            if (!!track.data.track) {
+                                tTrack = JSON.parse(track.data.track);
+                            }
+                            tTrack.push([data.lng, data.lat]);
+                            Api.updateTrack(track.data.id, JSON.stringify(tTrack))
+                        }
                     })
                 }
                 if (listOfUsers[data.userId]) {
