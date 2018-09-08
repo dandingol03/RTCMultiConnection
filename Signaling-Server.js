@@ -615,6 +615,9 @@ module.exports = exports = function (app, socketCallback) {
                     Api.searchTrack(data.trackId).then((track) => {
                         var tTrack = JSON.parse(track.track);
                         tTrack.push([data.lng, data.lat]);
+                        console.log("=============");
+                        console.log(tTrack);
+                        console.log(data);
                         Api.updateTrack(track.id, JSON.stringify(tTrack))
                     })
                 }
