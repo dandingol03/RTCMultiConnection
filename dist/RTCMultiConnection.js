@@ -60,7 +60,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
         }
 
         try {
-            connection.socket = io(connection.socketURL + parameters,{'force new connection':true});
+            connection.socket = io(connection.socketURL + parameters, { 'force new connection': true });
         } catch (e) {
             connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
@@ -76,10 +76,10 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             console.log("join-our-room" + roomid + "");
         });
 
-        connection.socket.on('reconnect',function(){
-            connection.socket.emit('rejoin',myTool.localUserid,function(){
+        connection.socket.on('reconnect', function () {
+            connection.socket.emit('rejoin', myTool.localUserid, function () {
                 cosnole.log('rejoin all groups done!')
-            }) 
+            })
         })
 
 
@@ -310,11 +310,16 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
 
         connection.socket.on('connect', function () {
             if (alreadyConnected) {
-                if(myTool.localUserId!=undefined&&myTool.localUserId!=null)
+
+                if(mytool&&mytool.intervalId)
                 {
-                    connection.socket.emit('rejoin',myTool.localUserId,function(){
+                    window.clearInterval(mytool.intervalId)
+                }
+
+                if (myTool.localUserId != undefined && myTool.localUserId != null) {
+                    connection.socket.emit('rejoin', myTool.localUserId, function () {
                         cosnole.log('rejoin all groups done!')
-                    }) 
+                    })
                 }
 
                 return;
@@ -338,8 +343,10 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             if (connection.enableLogs) {
                 console.warn('socket.io connection is closed');
             }
-            //todo:设置重连任务
-            connection.socket.connect()
+            mytool.intervalId= window.setInterval(function () {
+                //设置重连任务
+                connection.socket.connect()
+            }, 1000)
         });
 
         connection.socket.on('join-with-password', function (remoteUserId) {
@@ -490,7 +497,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
                             return;
                         }
 
-                    
+
                         remoteUser.channels.forEach(function (channel) {
                             channel.send(data);
                         });
@@ -4360,10 +4367,10 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
         };
 
         mPeer.onNegotiationNeeded = function (message, remoteUserId, callback) {
-            
+
             remoteUserId = remoteUserId || message.remoteUserId;
             connectSocket(function () {
-                
+
                 connection.socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
                     remoteUserId: remoteUserId,
                     message: message,
@@ -4519,11 +4526,11 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             var mData = JSON.stringify(data);
             connection.socket.emit('set-lng-lat', mData);
         }
-     
-       
+
+
 
         //连接socket
-         connection.login = function (localUserid, isTeamMember, isPublicModerator, callback) {
+        connection.login = function (localUserid, isTeamMember, isPublicModerator, callback) {
             connection.waitingForLocalMedia = true;
             connection.isInitiator = true;
 
@@ -4669,7 +4676,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             var isDataOnly = false;
             console.log("1、+sesionid======================================" + connection.sessionid);
             if ((remoteUserId && remoteUserId.session) || !remoteUserId || typeof remoteUserId === 'string') {
-                console.log("2、+id======================================"+remoteUserId);
+                console.log("2、+id======================================" + remoteUserId);
                 var session = remoteUserId ? remoteUserId.session || connection.session : connection.session;
 
                 isOneWay = !!session.oneway;
@@ -4713,10 +4720,10 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
                 console.log("6、+sesionid======================================");
                 isDataOnly = options.isDataOnly;
             }
-            console.log("+connection.sesionid======================================"+connection.sessionid);
+            console.log("+connection.sesionid======================================" + connection.sessionid);
             var connectionDescription = {
                 remoteUserId: connection.sessionid,
-                
+
                 message: {
                     newParticipationRequest: true,
                     isOneWay: isOneWay,
@@ -4779,7 +4786,7 @@ window.RTCMultiConnection = function (roomid, forceOptions) {
             }
 
             if (session.audio || session.video || session.screen) {
-                console.log("+sesionid======================================"+session.audio+"+++"+session.video+"++"+session.screen)
+                console.log("+sesionid======================================" + session.audio + "+++" + session.video + "++" + session.screen)
                 if (session.screen) {
                     connection.getScreenConstraints(function (error, screen_constraints) {
                         console.log("20、+sesionid======================================");

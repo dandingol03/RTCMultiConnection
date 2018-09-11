@@ -224,7 +224,7 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         suffix=filename.substring(filename.lastIndexOf('.')+1)
         switch(suffix){
             case 'jpg':
-                mimeType='img/jpeg'
+                mimeType='image/jpeg'
             break;
             case 'png':
                 mimeType='image/png'
@@ -254,11 +254,10 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         {
             var imageBuf = fs.readFileSync(wholePath);
             response.writeHead(200, {
-            
                 'Content-Type': mimeType,
                 'Content-Disposition': 'attachment;filename=' + filename
             });
-            response.end(imageBuf.toString("base64"))
+            response.end('data:'+mimeType+';base64,'+imageBuf.toString("base64"))
             return
         }
 
@@ -502,7 +501,8 @@ var sendFileMessage = function (file, newMessage) {
             sender_name: senderName,
             type: mType,
             send_date: sendDate,
-            chat_type: mChatType
+            chat_type: mChatType,
+            room_id:parseInt(newMessage.room_id)
         }
         //messageType为1时，为单人聊天
         var userIds = [];

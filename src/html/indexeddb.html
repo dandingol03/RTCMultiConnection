@@ -12,6 +12,30 @@
     <script src="./indexDb.js"></script>
     <script src="./imageResizer.js"></script>
     <script src="../../demos/js/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            window.addEventListener('message', function (event) {
+                console.log('got iframe message -> ' + event.data);
+                debugger
+                var message=event.data
+                if(message.action)
+                {
+                    switch(message.action)
+                    {
+                        case 'ready':
+                        $('#child')[0].contentWindow.postMessage({action:'play',data:meId},
+                        "https://192.168.0.118:9001/demos/")
+                        break;
+                        case 'quit':
+                        $('#child').remove()
+                        break;
+                    }
+                }
+  
+            }, false);
+        })
+    </script>
 </head>
 
 <body>
@@ -23,6 +47,9 @@
     <input type="file" name="file" id="image" onchange="onIamgeSelect()"/>
 
     <div style="width: 260px;height: 200px;background-color: antiquewhite"></div>
+
+        <iframe id="child" src="https://192.168.0.118:9001/demos/Video-Conferencing.html?user_id=user_20159030" allow="geolocation; microphone; camera"
+        width="700" height="600" />
 
     <script>
 
