@@ -302,6 +302,9 @@ module.exports = exports = function (app, socketCallback) {
                 }
             })
 
+
+			
+
         })
 
         /*
@@ -565,8 +568,11 @@ module.exports = exports = function (app, socketCallback) {
             })
         })
 
-        socket.on('rejoin',function(userid,callback){
-            Api.getGroupChatRooms(userid).then((roomIds) => {
+        socket.on('rejoin',function(newUserId,callback){
+
+            //加入到socket缓存列表
+            appendUser(socket, null);
+            Api.getGroupChatRooms(newUserId).then((roomIds) => {
                 
                 for (var i = 0; i < roomIds.data.length; i++) {
                     socket.join(roomIds.data[i].name);

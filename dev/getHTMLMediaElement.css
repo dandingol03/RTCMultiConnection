@@ -33,7 +33,7 @@ Documentation - github.com/muaz-khan/WebRTC-Experiment/tree/master/getMediaEleme
 }
 
 .media-box {
-
+    height:315px !important;
     margin: 1px;
 }
 

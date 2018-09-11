@@ -9,6 +9,7 @@ function myTool() {
         tmp: null,
         audio: null,
         rec: null,
+        intervalId:null,
         // streams:[],
         toolInit: function () {
             this.connection = new RTCMultiConnection();

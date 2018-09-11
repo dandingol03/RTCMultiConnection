@@ -31,6 +31,14 @@
 
             window.createAudioUrl = window.URL.createObjectURL
 
+            window.getBase64 = function () {
+                $.get("https://192.168.0.118:9001/file-download?filePath=file-1536393871772.png&base64Encode=true", function (result) {
+                    var image=new Image()
+                    image.src=result
+                    image.height=200
+                    document.body.append(image)
+                });
+            }
 
             window.upload = function () {
 
@@ -112,7 +120,7 @@
         <input type="text" id="isTeamMember" placeholder="isTeamMember" autocorrect=off autocapitalize=off size=20>
         <input type="text" id="remote-id" placeholder="Type" autocorrect=off autocapitalize=off size=20>
         <input type="text" id="room-name" placeholder="room name" autocorrect=off autocapitalize=off size=20>
-        <hr/>
+        <hr />
         <button id="login">Login</button>
         <button id="join-room">Join Room</button>
         <button id="open-video-conference">open room to take part in video conference</button>
@@ -170,8 +178,7 @@
         <iframe width="0" height="0" frameborder="0" style="display:none" scrolling="no" name="downloadframe" id="uploadframe"></iframe>
     </form>
 
-    <!-- <iframe id="child" src="https://192.168.0.101:9002/demos/Video-Conferencing.html" allow="geolocation; microphone; camera"
-        width="700" height="600" /> -->
+
 
 
 
@@ -245,11 +252,11 @@
             mytool.CLogin(document.getElementById('user-name').value, locallng, locallat, localtype, localTM);
         };
 
-        document.getElementById('disconnect').onclick=function(){
+        document.getElementById('disconnect').onclick = function () {
             mytool.disconnect()
         }
 
-        document.getElementById('reconnect').onclick=function(){
+        document.getElementById('reconnect').onclick = function () {
             mytool.reconnect()
         }
 
@@ -332,11 +339,11 @@
         };
         mytool.connection.filesContainer = document.getElementById('file-container');
 
-        window.upKeyFlag=false
-        window.leftKeyFlag=false
-        window.rightKeyFlag=false
-    
-        window.playFlag=true
+        window.upKeyFlag = false
+        window.leftKeyFlag = false
+        window.rightKeyFlag = false
+
+        window.playFlag = true
     </script>
 </body>
 
