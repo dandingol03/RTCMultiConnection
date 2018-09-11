@@ -9,6 +9,13 @@
   <link rel="shortcut icon" href="/demos/logo.png">
   <link rel="stylesheet" href="/demos/stylesheet.css">
   <script src="/demos/menu.js"></script>
+  <script src="/demos/js/jquery.min.js"></script>
+  <script>
+          $(document).ready(function () {
+            console.log('ready')
+            top.postMessage({ action: 'ready' }, '*')
+        })
+  </script>
 </head>
 <body>
  
@@ -41,6 +48,22 @@ document.getElementById('open-room').onclick = function() {
         showRoomURL(connection.sessionid);
     });
 };
+
+ window.addEventListener('message', function (event) {
+            console.log(event);
+            var message = event.data
+            switch (message.action) {
+                case 'play':
+                    disableInputButtons();
+                    connection.openOrJoin(message.data, function (isRoomExist, roomid) {
+                        if (isRoomExist === false && connection.isInitiator === true) {
+                            // if room doesn't exist, it means that current user will create the room
+                            showRoomURL(roomid);
+                        }
+                    });
+                    break;
+            }
+        }, false);
 
 document.getElementById('join-room').onclick = function() {
     disableInputButtons();
