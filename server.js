@@ -489,11 +489,17 @@ var sendFileMessage = function (file, newMessage) {
     var mType = newMessage.type;
     var receiverId = newMessage.receiverId;
     var receiverName = newMessage.receiverName;
-    var room_id=parseInt(newMessage.room_id)
     var room_name=newMessage.room_name
     var mChatType = newMessage.chat_type;
     var sendDate = newMessage.send_date;
     var clientType=newMessage.client_type
+    var room_id=newMessage.room_id
+    if(clientType=='mobile'&&mChatType=='1')
+    {
+    }else{
+        room_id=parseInt(newMessage.room_id)
+    }
+   
     var message = file
     console.log(newMessage)
     if ((mChatType+'')== '1') {
@@ -506,12 +512,13 @@ var sendFileMessage = function (file, newMessage) {
             type: mType,
             send_date: sendDate,
             chat_type: mChatType,
-            room_id:parseInt(newMessage.room_id)
+            room_id:room_id
         }
         if(clientType=='mobile')
         {
             receiverId=room_id
             receiverName=room_name
+        }else{
         }
         var userIds = [];
         userIds.push(senderId);
