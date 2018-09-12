@@ -508,7 +508,11 @@ var sendFileMessage = function (file, newMessage) {
             chat_type: mChatType,
             room_id:parseInt(newMessage.room_id)
         }
-        //messageType为1时，为单人聊天
+        if(clientType=='mobile')
+        {
+            receiverId=room_id
+            receiverName=room_name
+        }
         var userIds = [];
         userIds.push(senderId);
         userIds.push(receiverId);
