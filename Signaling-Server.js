@@ -444,8 +444,8 @@ module.exports = exports = function (app, socketCallback) {
             var mType = newMessage.type;
             var sendDate = newMessage.send_date;
             var mchatType = newMessage.chat_type+'';  //群聊的chatType 为2
-
-	    console.log(newMessage)
+            console.log(newMessage)
+            
             var data;
             data = {
                 content: message,

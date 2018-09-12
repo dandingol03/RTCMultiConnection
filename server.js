@@ -484,13 +484,16 @@ expressRoute.get('/*', function (request, response) {
 
 var sendFileMessage = function (file, newMessage) {
     var room = newMessage.groupName;
-    var senderId = newMessage.senderId;
-    var senderName = newMessage.senderName;
+    var senderId = newMessage.sender_id;
+    var senderName = newMessage.sender_name;
     var mType = newMessage.type;
     var receiverId = newMessage.receiverId;
     var receiverName = newMessage.receiverName;
-    var mChatType = newMessage.chatType;
-    var sendDate = newMessage.sendDate;
+    var room_id=parseInt(newMessage.room_id)
+    var room_name=newMessage.room_name
+    var mChatType = newMessage.chat_type;
+    var sendDate = newMessage.send_date;
+    var clientType=newMessage.client_type
     var message = file
     console.log(newMessage)
     if ((mChatType+'')== '1') {
@@ -518,30 +521,30 @@ var sendFileMessage = function (file, newMessage) {
         });
     } else if ((''+mChatType) == '2') {
         //多人聊天
-        //messageType为2时，为群聊
         var data = {};
         data = {
             content: message,
             sender_id: senderId,
             sender_name: senderName,
-            room_id: receiverId,
-            room_name: receiverName,
+            room_id: room_id,
+            room_name: room_name,
             chat_type: mChatType,
             type: mType,
             send_date: sendDate
         }
-        Memory.listOfUsers[senderId].socket.to(receiverName).emit('receive-message-group', data);
-        Api.getRoomMember(receiverName).then((userIds) => {
+        Memory.listOfUsers[senderId].socket.to(room_name).emit('receive-message-group', data);
+        
+         //筛选出当前不在线的群成员,并发送离线消息
+        Api.getRoomMember(room_name).then((userIds) => {
             console.log(userIds);
             //获取当前群所有的成员
             var users = [];
             for (var i = 0; i < userIds.data.length; i++) {
                 users.push(userIds.data[i].user_id);
             }
-            //筛选出当前不在线的群成员
+           
             var leaveUsers = [];
             for (var i = 0; i < users.length; i++) {
-                // console.log(tempuserlist);
                 try {
                     if (Memory.listOfUsers[users[i]] == null) {
                         leaveUsers.push(users[i]);
@@ -550,8 +553,8 @@ var sendFileMessage = function (file, newMessage) {
                     console.log(error);
                 }
             }
-            if (leaveUsers != null) {
-                Api.sendGroupMessage(receiverId, senderId, senderName, message, leaveUsers, mType, mChatType, sendDate);
+            if (leaveUsers&&leaveUsers.length>0) {
+                Api.sendGroupMessage(room_id, senderId, senderName, message, leaveUsers, mType, mChatType, sendDate);
             }
         })
 
