@@ -19,7 +19,7 @@ var all = {
     sequelize:{
         username: 'root',
         password: 'Pa$$w0rd@2018',
-        database: 'sdrpoms',
+        database: 'sdrpoms12',
         host: "221.214.68.12",
         dialect: 'mysql',
         define: {

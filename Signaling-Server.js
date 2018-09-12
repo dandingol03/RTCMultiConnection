@@ -264,17 +264,27 @@ module.exports = exports = function (app, socketCallback) {
         //接收文本消息 edit by wqz
         socket.on('send-message-person', function (newMessage, callback) {
             var userIds = [];
-            var mchatType = newMessage.chatType;
+            var mchatType = newMessage.chat_type+'';
             var message = newMessage.content;
-            var senderId = newMessage.senderId;
+            var senderId = newMessage.sender_id;
             var mType = newMessage.type;
-            var receiverId = newMessage.receiverId;
+            var receiverId = newMessage.receiver_id;
             var sendDate = newMessage.sendDate;
-            var senderName = newMessage.senderName;
+            var senderName = newMessage.sender_name;
             var receiverName = newMessage.receiverName
             var roomId=newMessage.room_id
-            if(roomId!==undefined&&roomId!==null)
+            var client_type=newMessage.client_type
+
+            if(client_type!=undefined&&client_type!=null)
+            {
+                receiverId=roomId
+                receiverName=newMessage.room_name
+            }else{
+                if(roomId!==undefined&&roomId!==null)
                 roomId=parseInt(roomId)
+            }
+        
+            
 
             userIds.push(senderId);
             userIds.push(receiverId);
@@ -291,6 +301,8 @@ module.exports = exports = function (app, socketCallback) {
                 room_id:roomId
             }
             Api.createRoomWithoutName(userIds).then((ins) => {
+                var roomInfo=ins.data
+                data.room_id=roomInfo.id
                 if (listOfUsers[receiverId] != null) {
                     listOfUsers[receiverId].socket.emit('receive-message', data)
                 } else {
@@ -425,13 +437,13 @@ module.exports = exports = function (app, socketCallback) {
         //群聊消息 message文本消息，groupId群名，sender发送人，type消息类型,date消息发送时间
         socket.on('send-message-group', function (newMessage, callback) {
             var message = newMessage.content;
-            var room = newMessage.receiverName;
-            var roomId = newMessage.receiverId;
-            var senderId = newMessage.senderId;
-            var senderName = newMessage.senderName;
+            var room_name = newMessage.room_name;
+            var roomId = parseInt(newMessage.room_id)
+            var senderId = newMessage.sender_id;
+            var senderName = newMessage.sender_name;
             var mType = newMessage.type;
-            var sendDate = newMessage.sendDate;
-            var mchatType = newMessage.chatType;  //群聊的chatType 为2
+            var sendDate = newMessage.send_date;
+            var mchatType = newMessage.chat_type+'';  //群聊的chatType 为2
 
             var data;
             data = {
@@ -439,17 +451,17 @@ module.exports = exports = function (app, socketCallback) {
                 sender_id: senderId,
                 sender_name: senderName,
                 room_id: roomId,
-                room_name: room,
+                room_name: room_name,
                 chat_type: mchatType,
                 type: mType,
                 send_date: sendDate
             }
-            if (message && room && roomId && senderId && mType) {
-                socket.to(room).emit('receive-message-group', data);
+            if (message && room_name && roomId && senderId && mType) {
+                socket.to(room_name).emit('receive-message-group', data);
                 if (callback) {
                     callback(true);
                 }
-                Api.getRoomMember(room).then((userIds) => {
+                Api.getRoomMember(room_name).then((userIds) => {
                     console.log(userIds);
                     //获取当前群所有的成员
                     var users = [];
@@ -471,7 +483,7 @@ module.exports = exports = function (app, socketCallback) {
                             console.log(error);
                         }
                     }
-                    console.log(roomId.id);
+                    
                     if (leaveUsers != null) {
                         Api.sendGroupMessage(roomId, senderId, senderName, message, leaveUsers, mType, mchatType, sendDate).then(() => {
                         })
@@ -571,7 +583,7 @@ module.exports = exports = function (app, socketCallback) {
         socket.on('rejoin',function(newUserId,callback){
 
             //加入到socket缓存列表
-            appendUser(socket, null);
+                appendUser(socket, null);
             Api.getGroupChatRooms(newUserId).then((roomIds) => {
                 
                 for (var i = 0; i < roomIds.data.length; i++) {
