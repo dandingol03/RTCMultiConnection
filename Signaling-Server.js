@@ -433,6 +433,7 @@ module.exports = exports = function (app, socketCallback) {
             var sendDate = newMessage.sendDate;
             var mchatType = newMessage.chatType;  //群聊的chatType 为2
 
+	    console.log(newMessage)
             var data;
             data = {
                 content: message,
