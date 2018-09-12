@@ -492,6 +492,7 @@ var sendFileMessage = function (file, newMessage) {
     var mChatType = newMessage.chatType;
     var sendDate = newMessage.sendDate;
     var message = file
+    console.log(newMessage)
     if ((mChatType+'')== '1') {
         //单聊
         var data = {};
@@ -564,7 +565,7 @@ var sendFileMessage = function (file, newMessage) {
 //上传文件
 expressRoute.post('/file-upload', function (request, response) {
 
-    console.log('...========.')
+    console.log('...............=====================================.')
     var up = upload.single('file')
     console.log("request=========")
     // console.log(request.file);
