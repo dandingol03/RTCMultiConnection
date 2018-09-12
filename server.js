@@ -572,7 +572,7 @@ var sendFileMessage = function (file, newMessage) {
 //上传文件
 expressRoute.post('/file-upload', function (request, response) {
 
-    console.log('...========.')
+    console.log('...............=====================================.')
     var up = upload.single('file')
     console.log("request=========")
     // console.log(request.file);
