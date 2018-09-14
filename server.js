@@ -544,7 +544,9 @@ var sendFileMessage = function (file, newMessage) {
             type: mType,
             send_date: sendDate
         }
-        Memory.listOfUsers[senderId].socket.to(room_name).emit('receive-message-group', data);
+
+        if(Memory.listOfUsers[senderId]!=undefined&&Memory.listOfUsers[senderId]!=null)
+            Memory.listOfUsers[senderId].socket.to(room_name).emit('receive-message-group', data);
         
          //筛选出当前不在线的群成员,并发送离线消息
         Api.getRoomMember(room_name).then((userIds) => {
