@@ -300,6 +300,8 @@ module.exports = exports = function (app, socketCallback) {
                 receiver_name: receiverName,
                 room_id:roomId
             }
+            console.log('send data')
+            console.log(data)
             Api.createRoomWithoutName(userIds).then((ins) => {
                 var roomInfo=ins.data
                 data.room_id=roomInfo.id
