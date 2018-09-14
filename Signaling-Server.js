@@ -297,10 +297,11 @@ module.exports = exports = function (app, socketCallback) {
                 type: mType,
                 send_date: sendDate,
                 chat_type: mchatType,
+                receiver_id:receiverId,
                 receiver_name: receiverName,
                 room_id:roomId
             }
-            console.log('send data')
+            console.log('======= send message person ======')
             console.log(data)
             Api.createRoomWithoutName(userIds).then((ins) => {
                 var roomInfo=ins.data
