@@ -269,7 +269,7 @@ module.exports = exports = function (app, socketCallback) {
             var senderId = newMessage.sender_id;
             var mType = newMessage.type;
             var receiverId = newMessage.receiver_id;
-            var sendDate = newMessage.sendDate;
+            var sendDate = newMessage.send_date;
             var senderName = newMessage.sender_name;
             var receiverName = newMessage.receiverName
             var roomId=newMessage.room_id
