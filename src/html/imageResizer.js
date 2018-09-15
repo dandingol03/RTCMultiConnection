@@ -55,10 +55,12 @@ var ImageResizer=function(opts){
                 }
             }
             else if(dataSourceType=="file"){
-                _me.getBase4FromImgFile(function(base64str){
+                _me.getBase4FromImgFile(datasource, function(base64str){
                     img1.src=base64str;
-                    if(callback){
-                        callback(img1);
+                    img1.onload=function(){
+                        if(callback){
+                            callback(img1);
+                         }
                     }
                 });
             }

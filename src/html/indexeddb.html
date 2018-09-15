@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="author" content="sina_mobile">
     <meta name="format-detection" content="telephone=no" />
@@ -14,26 +13,65 @@
     <script src="../../demos/js/jquery.min.js"></script>
 
     <script>
-        $(document).ready(function(){
-            window.addEventListener('message', function (event) {
-                console.log('got iframe message -> ' + event.data);
-                debugger
-                var message=event.data
-                if(message.action)
-                {
-                    switch(message.action)
-                    {
-                        case 'ready':
-                        $('#child')[0].contentWindow.postMessage({action:'play',data:meId},
-                        "https://192.168.0.118:9001/demos/")
-                        break;
-                        case 'quit':
-                        $('#child').remove()
-                        break;
-                    }
-                }
-  
-            }, false);
+        $(document).ready(function () {
+
+            window.compressImage = function () {
+                var fileTag = $('#form input[type="file"]')[0]
+                if (!fileTag)
+                    return
+                var oFile = fileTag.files[0]
+                var imgSize = oFile.size;
+                //图片压缩
+                var reader = new FileReader(),
+                    maxWidth = 260,
+                    maxHeight = 500,
+                    suffix = oFile.name.substring(oFile.name.lastIndexOf('.') + 1);
+
+                reader.onload = function (e) {
+                    var base64Img = e.target.result;
+                    debugger
+
+                    //  dataSource: base64Img,
+                    //  dataSourceType: "base64",
+
+
+                    var _ir = ImageResizer({
+                        resizeMode: "auto",
+                        dataSource: oFile,
+                        dataSourceType: "file",
+                        maxWidth: maxWidth, //允许的最大宽度
+                        maxHeight: maxHeight, //允许的最大高度。
+                        onTmpImgGenerate: function (img) {
+                        },
+                        success: function (resizeImgBase64, canvas) {
+                            debugger
+                            var image = new Image()
+                            image.onreadystatechange = function () {
+                                if (image.readyState == "complete") {
+                                    initFileSize = image.fileSize;
+                                    var fileSize = Math.ceil(initFileSize / 1024);
+                                    imgSize.innerHTML = "尺寸：" + img.height + "×" + img.width + " " + fileSize + "k";
+                                }
+                            }
+
+
+                            image.src = resizeImgBase64
+                            document.body.append(image)
+
+
+                            return
+                            var blob = dataURLtoBlob(resizeImgBase64);
+                            formData.append(fileId, blob, oFile['name']);
+
+                            uploadPic(formData, picNum);
+                        }
+                    });
+                };
+                reader.readAsDataURL(oFile);
+
+                console.log()
+            }
+
         })
     </script>
 </head>
@@ -44,22 +82,23 @@
         <input type="file" name="file" />
     </form>
 
-    <input type="file" name="file" id="image" onchange="onIamgeSelect()"/>
+    <input type="file" name="file" id="image" "/>
 
-    <div style="width: 260px;height: 200px;background-color: antiquewhite"></div>
+    <div style=" width: 260px;height: 200px;background-color:
+        antiquewhite"></div>
 
-        <iframe id="child" src="https://192.168.0.118:9001/demos/Video-Conferencing.html?user_id=user_20159030" allow="geolocation; microphone; camera"
+    <iframe id="child" src="https://192.168.0.118:9001/demos/Video-Conferencing.html?user_id=user_20159030" allow="geolocation; microphone; camera"
         width="700" height="600" />
 
     <script>
 
-        function onIamgeSelect(){
+        function onIamgeSelect() {
             var reader = new FileReader();
-            var file=$('#image')[0].files[0]
+            var file = $('#image')[0].files[0]
             reader.onload = function (e) {
                 var base64Img = e.target.result;
-                var image=new Image()
-                image.src=base64Img
+                var image = new Image()
+                image.src = base64Img
                 document.body.append(image)
             }
             reader.readAsDataURL(file);
@@ -212,60 +251,6 @@
             indexDb.instance.updateDataByField('content', 'room_id', roomRange, 0, function (affected) {
                 console.log(affected + ' record has been updated')
             })
-        }
-
-        window.compressImage = function () {
-            var fileTag = $('#form input[type="file"]')[0]
-            if (!fileTag)
-                return
-            var oFile = fileTag.files[0]
-            var imgSize = oFile.size;
-            //图片压缩
-            var reader = new FileReader(),
-                maxWidth = 260,
-                maxHeight = 500,
-                suffix = oFile.name.substring(oFile.name.lastIndexOf('.') + 1);
-
-            reader.onload = function (e) {
-                var base64Img = e.target.result;
-                debugger
-
-
-                var _ir = ImageResizer({
-                    resizeMode: "auto",
-                    dataSource: base64Img,
-                    dataSourceType: "base64",
-                    maxWidth: maxWidth, //允许的最大宽度
-                    maxHeight: maxHeight, //允许的最大高度。
-                    onTmpImgGenerate: function (img) {
-                    },
-                    success: function (resizeImgBase64, canvas) {
-                        debugger
-                        var image = new Image()
-                        image.onreadystatechange = function () {
-                            if (image.readyState == "complete") {
-                                initFileSize = image.fileSize;
-                                var fileSize = Math.ceil(initFileSize / 1024);
-                                imgSize.innerHTML = "尺寸：" + img.height + "×" + img.width + " " + fileSize + "k";
-                            }
-                        }
-
-                        
-                        image.src = resizeImgBase64
-                        document.body.append(image)
-
-
-                        return
-                        var blob = dataURLtoBlob(resizeImgBase64);
-                        formData.append(fileId, blob, oFile['name']);
-
-                        uploadPic(formData, picNum);
-                    }
-                });
-            };
-            reader.readAsDataURL(oFile);
-
-            console.log()
         }
 
 
