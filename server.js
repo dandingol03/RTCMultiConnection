@@ -525,6 +525,7 @@ var sendFileMessage = function (file, newMessage) {
         userIds.push(receiverId);
         console.log('receiverId======'+receiverId)
         Api.createRoomWithoutName(userIds).then((roomId) => {
+            console.log('user in Memory? -> '+Memory.listOfUsers[receiverId])
             if (Memory.listOfUsers[receiverId] != null) {
                 Memory.listOfUsers[receiverId].socket.emit('receive-message', data)
             } else {
