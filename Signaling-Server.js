@@ -32,7 +32,7 @@ module.exports = exports = function (app, socketCallback) {
         //将listofUsers中的userId、lng、lat、type、isTeamMember数据储存在tempuserlist中，并广播出去 
         setInterval(show, 5000);
         function show() {
-            tempuserlist.splice(0, tempuserlist.length);
+            tempuserlist=[]
             for (userid in listOfUsers) {
                 var temp = {
                     userId: userid,
@@ -475,7 +475,7 @@ module.exports = exports = function (app, socketCallback) {
                     //筛选出当前不在线的群成员
                     var leaveUsers = [];
                     for (var i = 0; i < users.length; i++) {
-                        // console.log(tempuserlist);
+                        
                         try {
                             if (listOfUsers[users[i]] == null) {
                                 leaveUsers.push(users[i]);
@@ -507,7 +507,7 @@ module.exports = exports = function (app, socketCallback) {
         socket.on('get-userlist', function (userid, callback) {
             callback = callback || function () { };
             try {
-                tempuserlist.splice(0, tempuserlist.length);
+                tempuserlist=[]
                 for (socket.userid in listOfUsers) {
                     var temp = {
                         userId: socket.userid,
@@ -973,7 +973,7 @@ module.exports = exports = function (app, socketCallback) {
             }
 
             delete listOfUsers[socket.userid];
-            tempuserlist.splice(0, tempuserlist.length);
+            tempuserlist=[]
             for (socket.userid in listOfUsers) {
                 var temp = {
                     userId: socket.userid,
