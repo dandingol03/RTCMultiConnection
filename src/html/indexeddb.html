@@ -16,7 +16,7 @@
         $(document).ready(function () {
 
             window.compressImage = function () {
-                var fileTag = $('#form input[type="file"]')[0]
+                var fileTag = $('#tf input[type="file"]')[0]
                 if (!fileTag)
                     return
                 var oFile = fileTag.files[0]
@@ -27,50 +27,53 @@
                     maxHeight = 500,
                     suffix = oFile.name.substring(oFile.name.lastIndexOf('.') + 1);
 
-                reader.onload = function (e) {
-                    var base64Img = e.target.result;
-                    debugger
-
-                    //  dataSource: base64Img,
-                    //  dataSourceType: "base64",
-
-
-                    var _ir = ImageResizer({
-                        resizeMode: "auto",
-                        dataSource: oFile,
-                        dataSourceType: "file",
-                        maxWidth: maxWidth, //允许的最大宽度
-                        maxHeight: maxHeight, //允许的最大高度。
-                        onTmpImgGenerate: function (img) {
-                        },
-                        success: function (resizeImgBase64, canvas) {
-                            debugger
-                            var image = new Image()
-                            image.onreadystatechange = function () {
-                                if (image.readyState == "complete") {
-                                    initFileSize = image.fileSize;
-                                    var fileSize = Math.ceil(initFileSize / 1024);
-                                    imgSize.innerHTML = "尺寸：" + img.height + "×" + img.width + " " + fileSize + "k";
-                                }
+                var _ir = ImageResizer({
+                    resizeMode: "auto",
+                    dataSource: oFile,
+                    dataSourceType: "file",
+                    maxWidth: maxWidth, //允许的最大宽度
+                    maxHeight: maxHeight, //允许的最大高度。
+                    onTmpImgGenerate: function (img) {
+                    },
+                    success: function (resizeImgBase64, canvas) {
+                        debugger
+                        var image = new Image()
+                        image.onreadystatechange = function () {
+                            if (image.readyState == "complete") {
+                                initFileSize = image.fileSize;
+                                var fileSize = Math.ceil(initFileSize / 1024);
+                                imgSize.innerHTML = "尺寸：" + img.height + "×" + img.width + " " + fileSize + "k";
                             }
-
-
-                            image.src = resizeImgBase64
-                            document.body.append(image)
-
-
-                            return
-                            var blob = dataURLtoBlob(resizeImgBase64);
-                            formData.append(fileId, blob, oFile['name']);
-
-                            uploadPic(formData, picNum);
                         }
-                    });
-                };
-                reader.readAsDataURL(oFile);
 
-                console.log()
+
+                        image.src = resizeImgBase64
+                        document.body.append(image)
+
+
+                        return
+                        var blob = dataURLtoBlob(resizeImgBase64);
+                        formData.append(fileId, blob, oFile['name']);
+
+                        uploadPic(formData, picNum);
+                    }
+                });
+
             }
+            // reader.onload = function (e) {
+            //     var base64Img = e.target.result;
+            //     debugger
+
+            //     //  dataSource: base64Img,
+            //     //  dataSourceType: "base64",
+
+
+
+            // };
+            // //reader.readAsDataURL(oFile);
+
+            // console.log()
+            //}
 
         })
     </script>

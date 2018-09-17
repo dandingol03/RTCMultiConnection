@@ -503,7 +503,7 @@ module.exports = exports = function (app, socketCallback) {
             }
         })
 
-        //接受用户获取用户列表的消息，并发送用户信息 edit by wqz
+        //接受用户获取用户列表的消息
         socket.on('get-userlist', function (userid, callback) {
             callback = callback || function () { };
             try {
@@ -520,7 +520,11 @@ module.exports = exports = function (app, socketCallback) {
                 }
                 io.emit('return-userlist', 1, tempuserlist);
                 io.emit('return-userlist', 1, _.keys(listOfUsers));
-                console.log(tempuserlist);
+                if(callback)
+                {
+                    callback(tempuserlist)
+                }
+                console.log('tmpuserList -> '+tempuserlist) 
                 // io.emit('return-userlist',1,util.inspect(listOfUsers,{depth:null}));
 
             } catch (e) {
