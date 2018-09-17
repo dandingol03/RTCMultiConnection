@@ -519,7 +519,7 @@ module.exports = exports = function (app, socketCallback) {
                     tempuserlist.push(temp);
                 }
                 io.emit('return-userlist', 1, tempuserlist);
-                io.emit('return-userlist', 1, _.keys(listOfUsers));
+                //io.emit('return-userlist', 1, _.keys(listOfUsers));
                 if(callback)
                 {
                     callback(tempuserlist)
