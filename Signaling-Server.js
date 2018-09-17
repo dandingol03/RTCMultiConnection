@@ -30,7 +30,7 @@ module.exports = exports = function (app, socketCallback) {
         var io = require('socket.io');
         //每隔5秒 服务端向浏览器 推送消息 by wqz 
         //将listofUsers中的userId、lng、lat、type、isTeamMember数据储存在tempuserlist中，并广播出去 
-        setInterval(show, 10000);
+        setInterval(show, 5000);
         function show() {
             tempuserlist.splice(0, tempuserlist.length);
             for (userid in listOfUsers) {
