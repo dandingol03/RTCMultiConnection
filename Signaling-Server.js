@@ -257,19 +257,23 @@ module.exports = exports = function (app, socketCallback) {
                     if(res.re==1)
                     {
                         console.log('userIds-> '+ res.data)
-                        console.log('=========================================listOfUsers -> \n'+listOfUsers.toString())
+                        console.log('=========================================listOfUsers -> \n'+ _.keys(listOfUsers))
                         var offline=[]
                         var userIds=res.data
-                        for (var i = 0; i < userIds.length; i++) {
-                            console.log('================user_id -> '+userIds[i])
-                            if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
-                                console.log('======================================join-our-room ->'+userIds[i])
-                                listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
-                            } else {
-                                offline.add(userIds[i])
+                        try{
+                            for (var i = 0; i < userIds.length; i++) {
+                                console.log('================user_id -> '+userIds[i])
+                                if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
+                                    console.log('======================================join-our-room ->'+userIds[i])
+                                    listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
+                                } else {
+                                    offline.add(userIds[i])
+                                }
                             }
+                           offlineUserCallback(offline)   
+                        }catch(e){
+                            console.error(e)
                         }
-                       offlineUserCallback(offline)
                     }
                 })
             }
