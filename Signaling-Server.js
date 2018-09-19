@@ -241,26 +241,31 @@ module.exports = exports = function (app, socketCallback) {
             }
             
             console.log('remoteUserIds============================>'+remoteUserIds)
-
+            var remote_user_id=null
             if(remoteUserIds&&!remoteUserIds instanceof Array)
             {
-                if(remoteUserIds.indexOf('[')==0)
+                if(!remoteUserIds instanceof Array)
                 {
-                    var tmp=remoteUserIds.substring(0,remoteUserIds.length-1)
-                    remoteUserIds=tmp.split(',')
+                    if(remoteUserIds.indexOf('[')==0)
+                    {
+                        remote_user_id=remoteUserIds.substring(1,remoteUserIds.length-1)
+                    }
+                }else{
+                    remote_user_id=remoteUserIds[0]
                 }
+              
             }
-            console.log('remoteUserIds length '+remoteUserIds.length)
+            console.log('remote_user_id         -> '+remote_user_id)
             //单聊
-            if(remoteUserIds!=null&&remoteUserIds.length==1)        
+            if(remote_user_id)        
             {
-                var remote_id=remoteUserIds[0]
+                var remote_id=remote_user_id
                 console.log('remote id ======================>'+remote_id)
                 console.log('listOfUsers=========================>'+_.keys(listOfUsers))
                 if (listOfUsers[remote_id] && listOfUsers[remote_id].socket) {
                     listOfUsers[remote_id].socket.emit('join-our-room', remote_id)//以remote_id作为房间名
                 } else {
-                    offline.push(remoteUserIds[i])
+                    offline.push(remote_id)
                 }
                 offlineUserCallback(offline)
                
