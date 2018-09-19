@@ -240,6 +240,7 @@ module.exports = exports = function (app, socketCallback) {
                 }
             }
             
+            console.log('remoteUserIds============================>'+remoteUserIds.toString())
             //单聊
             if(remoteUserIds!=null&&remoteUserIds.length==1)        
             {
