@@ -238,7 +238,7 @@ module.exports = exports = function (app, socketCallback) {
                         callback({re:1})
                 }
             }
-
+            console.log('remoteUserIds -> '+remoteUserIds)
             //单聊
             if(remoteUserIds!=null&&remoteUserIds.length==1)        
             {
@@ -252,9 +252,12 @@ module.exports = exports = function (app, socketCallback) {
                 offlineUserCallback(offline)
                
             }else{
+            
                 Api.getMembersInRoom(room_id,socket.userid).then((res)=>{
                     if(res.re==1)
                     {
+                        console.log('group video')
+                        console.log('userIds -> '+userIds)
                         var offline=[]
                         var userIds=res.data
                         for (var i = 0; i < userIds.length; i++) {
