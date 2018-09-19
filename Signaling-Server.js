@@ -242,7 +242,7 @@ module.exports = exports = function (app, socketCallback) {
             
             console.log('remoteUserIds============================>'+remoteUserIds)
             var remote_user_id=null
-            if(remoteUserIds&&!remoteUserIds instanceof Array)
+            if(remoteUserIds)
             {
                 if(!remoteUserIds instanceof Array)
                 {
