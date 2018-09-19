@@ -241,20 +241,17 @@ module.exports = exports = function (app, socketCallback) {
             }
             
             console.log('remoteUserIds============================>'+remoteUserIds)
-            var remote_user_id=null
-            if(remoteUserIds)
-            {
-                if(!remoteUserIds instanceof Array)
-                {
-                    if(remoteUserIds.indexOf('[')==0)
-                    {
-                        remote_user_id=remoteUserIds.substring(1,remoteUserIds.length-1)
+            var remote_user_id=null 
+            if (remoteUserIds) {
+                if (remoteUserIds instanceof Array) {
+                    remote_user_id = remoteUserIds[0]
+                } else {
+                    if (remoteUserIds.indexOf('[') == 0) {
+                        remote_user_id = remoteUserIds.substring(1, remoteUserIds.length - 1)
                     }
-                }else{
-                    remote_user_id=remoteUserIds[0]
                 }
-              
             }
+            
             console.log('remote_user_id         -> '+remote_user_id)
             //单聊
             if(remote_user_id)        

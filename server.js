@@ -85,10 +85,11 @@ mysql.sequelize.sync({ force: false }).then(function () {
 
     //     for (var i = 0; i < userIds.length; i++) {
     //         console.log('================user_id -> '+userIds[i])
-           
+
     //     }
 
     // })
+
 
 }).catch(function (err) {
     console.log("Server failed to start due to error: %s", err);
@@ -206,8 +207,8 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
 
     //路径
     var filePath = request.query.filePath
-    
-    if (filePath == undefined || filePath == null || filePath == 'null'||filePath=='') {
+
+    if (filePath == undefined || filePath == null || filePath == 'null' || filePath == '') {
         response.end(404)
         return
     }
@@ -222,52 +223,50 @@ expressRoute.get('/file-download', urlencodedParser, function (request, response
         filename = filePath
 
 
-            
-    var base64Encode=false
-    if(request.query.base64Encode!==undefined&&request.query.base64Encode!==null)
-        base64Encode=true    
 
-    var suffix=null
-    var mimeType='application/force-download'
-    if(filename.indexOf('.')!=-1)
-    {
-        suffix=filename.substring(filename.lastIndexOf('.')+1)
-        switch(suffix){
+    var base64Encode = false
+    if (request.query.base64Encode !== undefined && request.query.base64Encode !== null)
+        base64Encode = true
+
+    var suffix = null
+    var mimeType = 'application/force-download'
+    if (filename.indexOf('.') != -1) {
+        suffix = filename.substring(filename.lastIndexOf('.') + 1)
+        switch (suffix) {
             case 'jpg':
-                mimeType='image/jpeg'
-            break;
+                mimeType = 'image/jpeg'
+                break;
             case 'png':
-                mimeType='image/png'
-            break;
+                mimeType = 'image/png'
+                break;
             case 'mp4':
-                mimeType='video/mpeg4'
-            break;
+                mimeType = 'video/mpeg4'
+                break;
             case 'amr':
-                mimeType='audio/amr'
-            break;
+                mimeType = 'audio/amr'
+                break;
         }
     }
-    
-    console.log('mime===='+mimeType)
+
+    console.log('mime====' + mimeType)
 
     var wholePath = path.resolve(__dirname, 'uploads')
     wholePath = path.join(wholePath, filePath)
     //判断文件是否存在
     fs.exists(wholePath, exists => {
         if (!exists) {
-            response.writeHead(500, {'Content-type' : 'application/text'});
+            response.writeHead(500, { 'Content-type': 'application/text' });
             response.end("png doesn't exist ")
             return
         }
 
-        if(base64Encode)
-        {
+        if (base64Encode) {
             var imageBuf = fs.readFileSync(wholePath);
             response.writeHead(200, {
                 'Content-Type': mimeType,
                 'Content-Disposition': 'attachment;filename=' + filename
             });
-            response.end('data:'+mimeType+';base64,'+imageBuf.toString("base64"))
+            response.end('data:' + mimeType + ';base64,' + imageBuf.toString("base64"))
             return
         }
 
@@ -499,20 +498,19 @@ var sendFileMessage = function (file, newMessage) {
     var mType = newMessage.type;
     var receiverId = newMessage.receiverId;
     var receiverName = newMessage.receiverName;
-    var room_name=newMessage.room_name
+    var room_name = newMessage.room_name
     var mChatType = newMessage.chat_type;
     var sendDate = newMessage.send_date;
-    var clientType=newMessage.client_type
-    var room_id=newMessage.room_id
-    if(clientType=='mobile'&&mChatType=='1')
-    {
-    }else{
-        room_id=parseInt(newMessage.room_id)
+    var clientType = newMessage.client_type
+    var room_id = newMessage.room_id
+    if (clientType == 'mobile' && mChatType == '1') {
+    } else {
+        room_id = parseInt(newMessage.room_id)
     }
-   
+
     var message = file
     console.log(newMessage)
-    if ((mChatType+'')== '1') {
+    if ((mChatType + '') == '1') {
         //单聊
         var data = {};
         data = {
@@ -522,28 +520,27 @@ var sendFileMessage = function (file, newMessage) {
             type: mType,
             send_date: sendDate,
             chat_type: mChatType,
-            room_id:room_id
+            room_id: room_id
         }
-        if(clientType=='mobile')
-        {
-            receiverId=room_id
-            receiverName=room_name
-        }else{
+        if (clientType == 'mobile') {
+            receiverId = room_id
+            receiverName = room_name
+        } else {
         }
         var userIds = [];
         userIds.push(senderId);
         userIds.push(receiverId);
-        console.log('receiverId======'+receiverId)
+        console.log('receiverId======' + receiverId)
         Api.createRoomWithoutName(userIds).then((roomId) => {
-            data.room_id= roomId.data.id
-            console.log('user in Memory? -> '+Memory.listOfUsers[receiverId])
+            data.room_id = roomId.data.id
+            console.log('user in Memory? -> ' + Memory.listOfUsers[receiverId])
             if (Memory.listOfUsers[receiverId] != null) {
                 Memory.listOfUsers[receiverId].socket.emit('receive-message', data)
             } else {
                 Api.sendGroupMessage(roomId.data.id, senderId, senderName, message, [receiverId], mType, mChatType, sendDate);
             }
         });
-    } else if ((''+mChatType) == '2') {
+    } else if (('' + mChatType) == '2') {
         //多人聊天
         var data = {};
         data = {
@@ -557,10 +554,10 @@ var sendFileMessage = function (file, newMessage) {
             send_date: sendDate
         }
 
-        if(Memory.listOfUsers[senderId]!=undefined&&Memory.listOfUsers[senderId]!=null)
+        if (Memory.listOfUsers[senderId] != undefined && Memory.listOfUsers[senderId] != null)
             Memory.listOfUsers[senderId].socket.to(room_name).emit('receive-message-group', data);
-        
-         //筛选出当前不在线的群成员,并发送离线消息
+
+        //筛选出当前不在线的群成员,并发送离线消息
         Api.getRoomMember(room_name).then((userIds) => {
             console.log(userIds);
             //获取当前群所有的成员
@@ -568,7 +565,7 @@ var sendFileMessage = function (file, newMessage) {
             for (var i = 0; i < userIds.data.length; i++) {
                 users.push(userIds.data[i].user_id);
             }
-           
+
             var leaveUsers = [];
             for (var i = 0; i < users.length; i++) {
                 try {
@@ -579,7 +576,7 @@ var sendFileMessage = function (file, newMessage) {
                     console.log(error);
                 }
             }
-            if (leaveUsers&&leaveUsers.length>0) {
+            if (leaveUsers && leaveUsers.length > 0) {
                 Api.sendGroupMessage(room_id, senderId, senderName, message, leaveUsers, mType, mChatType, sendDate);
             }
         })
@@ -648,7 +645,7 @@ expressRoute.post('/file-download', urlencodedParser, function (request, respons
             })
             return
         }
-        
+
         //读取文件大小
         fs.stat(wholePath, (err, stats) => {
             if (err) {
