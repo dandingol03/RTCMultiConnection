@@ -226,22 +226,49 @@ module.exports = exports = function (app, socketCallback) {
 
         //通知远程用户进行视频聊天  
         socket.on('notify-remoteId', function (remoteUserIds, room_id,callback) {
-            var offline=[]
-            for (var i = 0; i < remoteUserIds.length; i++) {
-                if (listOfUsers[remoteUserIds[i]] && listOfUsers[remoteUserIds[i]].socket) {
-                    listOfUsers[remoteUserIds[i]].socket.emit('join-our-room', room_id)
+
+              //回调不在线的user_id
+            function offlineUserCallback(){
+                if(offline.length>0)
+                {
+                    if(callback)
+                        callback({re:-1,data:offline})
+                }else{
+                    if(callback)
+                        callback({re:1})
+                }
+            }
+
+            //单聊
+            if(remoteUserIds!=null&&remoteUserIds.length==1)        
+            {
+                var remote_id=remoteUserIds[0]
+                var offline=[]
+                if (listOfUsers[remote_id] && listOfUsers[remote_id].socket) {
+                    listOfUsers[remote_id].socket.emit('join-our-room', remote_id)//以remote_id作为房间名
                 } else {
                     offline.add(remoteUserIds[i])
                 }
-            }
-            if(offline.length>0)
-            {
-                if(callback)
-                    callback({re:-1,data:offline})
+                offlineUserCallback(offline)
+               
             }else{
-                if(callback)
-                    callback({re:1})
+                getMembersInRoom(room_id,socket.userid).then((res)=>{
+                    if(res.re==1)
+                    {
+                        var offline=[]
+                        var userIds=res.data
+                        for (var i = 0; i < userIds.length; i++) {
+                            if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
+                                listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
+                            } else {
+                                offline.add(userIds[i])
+                            }
+                        }
+                       offlineUserCallback(offline)
+                    }
+                })
             }
+
         
         })
 
