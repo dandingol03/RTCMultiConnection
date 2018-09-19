@@ -818,7 +818,7 @@ var app;
 
 if (isUseHTTPs) {
     app = server.createServer(options, expressRoute);
-    app.seth
+    
 } else {
     app = server.createServer(serverHandler);
 }
@@ -884,27 +884,20 @@ function runServer() {
         if (addr.address === '0.0.0.0') {
             addr.address = 'localhost';
         }
-
         var domainURL = (isUseHTTPs ? 'https' : 'http') + '://' + addr.address + ':' + addr.port + '/';
-
         console.log('------------------------------');
-
         console.log('socket.io is listening at:');
         console.log('\x1b[31m%s\x1b[0m ', '\t' + domainURL);
-
         if (!isUseHTTPs) {
             console.log('use --ssl to enable HTTPs:');
             console.log('\x1b[31m%s\x1b[0m ', '\t' + 'node server.js --ssl');
         }
-
         console.log('Your web-browser (HTML file) MUST set this line:');
         console.log('\x1b[31m%s\x1b[0m ', 'connection.socketURL = "' + domainURL + '";');
-
         if (addr.address != 'localhost' && !isUseHTTPs) {
             console.log('Warning:');
             console.log('\x1b[31m%s\x1b[0m ', 'Please set isUseHTTPs=true to make sure audio,video and screen demos can work on Google Chrome as well.');
         }
-
         console.log('------------------------------');
         console.log('Need help? http://bit.ly/2ff7QGk');
     });
@@ -912,7 +905,7 @@ function runServer() {
     require('./Signaling-Server.js')(app, function (socket) {
         try {
             var params = socket.handshake.query;
-
+            console.log('connnect==========>')
             // "socket" object is totally in your own hands!
             // do whatever you want!
 
