@@ -34,6 +34,7 @@ module.exports = exports = function (app, socketCallback) {
         function show() {
             tempuserlist=[]
             for (userid in listOfUsers) {
+                
                 var temp = {
                     userId: userid,
                     lng: listOfUsers[userid].lng,
@@ -223,20 +224,25 @@ module.exports = exports = function (app, socketCallback) {
         });
 
 
-        //通知远程用户进行视频聊天  edit by wqz   
-        socket.on('notify-remoteId', function (remoteUserIds, userId) {
-            try {
-                for (var i = 0; i < remoteUserIds.length; i++) {
-                    if (listOfUsers[remoteUserIds[i]] && listOfUsers[remoteUserIds[i]].socket) {
-                        listOfUsers[remoteUserIds[i]].socket.emit('join-our-room', userId)
-                    } else {
-                        listOfUsers[userId].socket.emit('invite-video-answer', +'用户不在线')
-                    }
+        //通知远程用户进行视频聊天  
+        socket.on('notify-remoteId', function (remoteUserIds, room_id,callback) {
+            var offline=[]
+            for (var i = 0; i < remoteUserIds.length; i++) {
+                if (listOfUsers[remoteUserIds[i]] && listOfUsers[remoteUserIds[i]].socket) {
+                    listOfUsers[remoteUserIds[i]].socket.emit('join-our-room', room_id)
+                } else {
+                    offline.add(remoteUserIds[i])
                 }
-
-            } catch (e) {
-
             }
+            if(offline.length>0)
+            {
+                if(callback)
+                    callback({re:-1,data:offline})
+            }else{
+                if(callback)
+                    callback({re:1})
+            }
+        
         })
 
 
