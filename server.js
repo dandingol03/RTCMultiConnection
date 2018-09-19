@@ -80,9 +80,15 @@ mysql.sequelize.sync({ force: false }).then(function () {
     //     console.log(res)
     // })
 
-    // Api.getMembersInRoom(307,'user_150458').then((res)=>{
-    //     console.log(res)
-    // })
+    Api.getMembersInRoom(265,'user_150458').then((res)=>{
+        var userIds=res.data
+
+        for (var i = 0; i < userIds.length; i++) {
+            console.log('================user_id -> '+userIds[i])
+           
+        }
+
+    })
 
 }).catch(function (err) {
     console.log("Server failed to start due to error: %s", err);
