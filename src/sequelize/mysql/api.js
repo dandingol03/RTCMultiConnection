@@ -9,6 +9,14 @@ var Api = {
     insertRoomInfo: (roomName, type, t) => {
         return mysql.RoomInfo.create({ name: roomName, create_date: Api.getTaskTime(new Date().toString()), remark: type }, { transaction: t })
     },
+    //查询关系记录
+    fetchRelationsByRoomId:(room_id)=>{
+        return mysql.RelationShip.findAll({
+            where: {
+                room_id: room_id
+            }
+        })
+    },
     //插入关系记录
     insertRelation: (room_id, userIds, Type, t) => {
         var creates = []
@@ -450,6 +458,25 @@ var Api = {
                 t.rollback()
                 defer.reject({ re: -1, data: e })
             })
+        })
+        return defer.promise
+    },
+    //根据room_id查询成员
+    getMembersInRoom:(room_id,user_id)=>{
+        var defer = Q.defer()
+        Api.fetchRelationsByRoomId(room_id).then((res)=>{
+            if(res.length>0)
+            {
+                var members=[]
+                for(var i=0;i<res.length;i++)
+                {
+                    if(res[i].user_id!=user_id)
+                        members.push(res[i].user_id)
+                }
+                defer.resolve({re:1,data:members})
+            }else{
+                defer.resolve({re:2,data:null})
+            }
         })
         return defer.promise
     }
