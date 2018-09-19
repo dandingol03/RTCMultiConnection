@@ -247,7 +247,7 @@ module.exports = exports = function (app, socketCallback) {
                 if (listOfUsers[remote_id] && listOfUsers[remote_id].socket) {
                     listOfUsers[remote_id].socket.emit('join-our-room', remote_id)//以remote_id作为房间名
                 } else {
-                    offline.add(remoteUserIds[i])
+                    offline.push(remoteUserIds[i])
                 }
                 offlineUserCallback(offline)
                
@@ -267,7 +267,7 @@ module.exports = exports = function (app, socketCallback) {
                                     console.log('======================================join-our-room ->'+userIds[i])
                                     listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
                                 } else {
-                                    offline.add(userIds[i])
+                                    offline.push(userIds[i])
                                 }
                             }
                            offlineUserCallback(offline)   
