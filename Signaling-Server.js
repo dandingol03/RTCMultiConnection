@@ -239,12 +239,13 @@ module.exports = exports = function (app, socketCallback) {
                         callback({re:1})
                 }
             }
-            console.log('=====================================remoteUserIds -> '+remoteUserIds)
+            
             //单聊
             if(remoteUserIds!=null&&remoteUserIds.length==1)        
             {
                 var remote_id=remoteUserIds[0]
-              
+                console.log('remote id ======================>'+remote_id)
+                console.log('listOfUsers=========================>'+_.keys(listOfUsers))
                 if (listOfUsers[remote_id] && listOfUsers[remote_id].socket) {
                     listOfUsers[remote_id].socket.emit('join-our-room', remote_id)//以remote_id作为房间名
                 } else {
@@ -257,14 +258,10 @@ module.exports = exports = function (app, socketCallback) {
                 Api.getMembersInRoom(room_id,socket.userid).then((res)=>{
                     if(res.re==1)
                     {
-                        console.log('userIds-> '+ res.data)
-                        console.log('=========================================listOfUsers -> \n'+ _.keys(listOfUsers))
                         var userIds=res.data
                         try{
                             for (var i = 0; i < userIds.length; i++) {
-                                console.log('================user_id -> '+userIds[i])
                                 if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
-                                    console.log('======================================join-our-room ->'+userIds[i])
                                     listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
                                 } else {
                                     offline.push(userIds[i])
