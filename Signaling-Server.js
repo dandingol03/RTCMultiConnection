@@ -227,7 +227,8 @@ module.exports = exports = function (app, socketCallback) {
         //通知远程用户进行视频聊天  
         socket.on('notify-remoteId', function (remoteUserIds, room_id,callback) {
 
-              //回调不在线的user_id
+            var offline=[]
+            //回调不在线的user_id
             function offlineUserCallback(){
                 if(offline.length>0)
                 {
@@ -243,7 +244,7 @@ module.exports = exports = function (app, socketCallback) {
             if(remoteUserIds!=null&&remoteUserIds.length==1)        
             {
                 var remote_id=remoteUserIds[0]
-                var offline=[]
+              
                 if (listOfUsers[remote_id] && listOfUsers[remote_id].socket) {
                     listOfUsers[remote_id].socket.emit('join-our-room', remote_id)//以remote_id作为房间名
                 } else {
@@ -258,7 +259,6 @@ module.exports = exports = function (app, socketCallback) {
                     {
                         console.log('userIds-> '+ res.data)
                         console.log('=========================================listOfUsers -> \n'+ _.keys(listOfUsers))
-                        var offline=[]
                         var userIds=res.data
                         try{
                             for (var i = 0; i < userIds.length; i++) {
