@@ -256,12 +256,12 @@ module.exports = exports = function (app, socketCallback) {
                 Api.getMembersInRoom(room_id,socket.userid).then((res)=>{
                     if(res.re==1)
                     {
-                        console.log('group video')
                         console.log('userIds-> '+ res.data)
-                        console.log('=========================================listOfUsers -> \n'+listOfUsers)
+                        console.log('=========================================listOfUsers -> \n'+listOfUsers.toString())
                         var offline=[]
                         var userIds=res.data
                         for (var i = 0; i < userIds.length; i++) {
+                            console.log('================user_id -> '+userIds[i])
                             if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
                                 console.log('======================================join-our-room ->'+userIds[i])
                                 listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
