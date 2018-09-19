@@ -258,6 +258,7 @@ module.exports = exports = function (app, socketCallback) {
                     {
                         console.log('group video')
                         console.log('userIds-> '+ res.data)
+                        console.log('=========================================listOfUsers -> \n'+listOfUsers)
                         var offline=[]
                         var userIds=res.data
                         for (var i = 0; i < userIds.length; i++) {
