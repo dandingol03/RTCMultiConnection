@@ -252,7 +252,7 @@ module.exports = exports = function (app, socketCallback) {
                 offlineUserCallback(offline)
                
             }else{
-                getMembersInRoom(room_id,socket.userid).then((res)=>{
+                Api.getMembersInRoom(room_id,socket.userid).then((res)=>{
                     if(res.re==1)
                     {
                         var offline=[]
