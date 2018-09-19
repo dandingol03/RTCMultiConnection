@@ -238,7 +238,7 @@ module.exports = exports = function (app, socketCallback) {
                         callback({re:1})
                 }
             }
-            console.log('remoteUserIds -> '+remoteUserIds)
+            console.log('=====================================remoteUserIds -> '+remoteUserIds)
             //单聊
             if(remoteUserIds!=null&&remoteUserIds.length==1)        
             {
@@ -262,6 +262,7 @@ module.exports = exports = function (app, socketCallback) {
                         var userIds=res.data
                         for (var i = 0; i < userIds.length; i++) {
                             if (listOfUsers[userIds[i]] && listOfUsers[userIds[i]].socket) {
+                                console.log('======================================join-our-room ->'+userIds[i])
                                 listOfUsers[userIds[i]].socket.emit('join-our-room', room_id)
                             } else {
                                 offline.add(userIds[i])
